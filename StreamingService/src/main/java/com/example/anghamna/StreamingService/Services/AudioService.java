@@ -8,6 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -24,12 +25,32 @@ public class AudioService {
     }
 
     public Audio uploadAudio(UUID songId, MultipartFile file) throws IOException {
-        String filename = songId.toString() ;
-        File dest = new File(storagePath + File.separator + filename);
-        file.transferTo(dest);
+        try {
+            // Create directory if it doesn't exist
+            File directory = new File(storagePath);
+            if (!directory.exists()) {
+                if (!directory.mkdirs()) {
+                    throw new IOException("Failed to create directory: " + storagePath);
+                }
+            }
 
-        Audio audio = new Audio(songId, dest.getAbsolutePath(), LocalDateTime.now());
-        return audioRepository.save(audio);
+            String filename = songId.toString();
+            File dest = new File(storagePath + File.separator + filename);
+            
+            // Check if file is empty
+            if (file.isEmpty()) {
+                throw new IOException("Failed to store empty file");
+            }
+
+            // Save the file
+            file.transferTo(dest);
+
+            // Create and save the audio record
+            Audio audio = new Audio(songId, dest.getAbsolutePath(), LocalDateTime.now());
+            return audioRepository.save(audio);
+        } catch (Exception e) {
+            throw new IOException("Failed to store file: " + e.getMessage(), e);
+        }
     }
     public String getAudioIdBySongId(UUID songId)
     {
@@ -58,5 +79,9 @@ public class AudioService {
         }
 
         return audioFile.length();
+    }
+
+    public List<Audio> getAllAudio() {
+        return audioRepository.findAll() ;
     }
 }
