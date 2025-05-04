@@ -1,31 +1,27 @@
-package com.spotify.music.model;
+package com.example.anghamna.MusicService.Models;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Table(name = "songs")
 public class Song {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(columnDefinition = "UUID DEFAULT gen_random_uuid()")
     private UUID id;
 
-    @Column(nullable = false, length = 100)
     private String title;
 
     @Column(name = "artist_id", nullable = false)
     private UUID artistId;
 
-    @Column(length = 50)
     private String genre;
 
-    @Column(nullable = false)
     private int duration; // in seconds
 
     @CreationTimestamp
@@ -36,14 +32,9 @@ public class Song {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Column(name = "like_count", nullable = false)
     private int likeCount = 0;
 
-    @Column(name = "stream_count", nullable = false)
     private int streamCount = 0;
-
-    @ManyToMany(mappedBy = "songs")
-    private Set<Playlist> playlists = new HashSet<>();
 
     // Constructors
     public Song() {}
@@ -120,11 +111,4 @@ public class Song {
         this.streamCount = streamCount;
     }
 
-    public Set<Playlist> getPlaylists() {
-        return playlists;
-    }
-
-    public void setPlaylists(Set<Playlist> playlists) {
-        this.playlists = playlists;
-    }
 }

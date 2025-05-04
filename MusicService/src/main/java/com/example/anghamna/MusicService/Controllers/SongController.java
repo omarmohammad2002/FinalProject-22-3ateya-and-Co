@@ -1,32 +1,36 @@
-package com.spotify.music.controller;
+package com.example.anghamna.MusicService.Controllers;
 
-import com.spotify.music.model.Song;
-import com.spotify.music.service.SongService;
+
+import com.example.anghamna.MusicService.Models.Song;
+import com.example.anghamna.MusicService.Services.SongService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/songs")
-@RequiredArgsConstructor
+@RequestMapping("/songs")
 public class SongController {
 
+    @Autowired
     private final SongService songService;
 
+    public SongController(SongService songService) {
+        this.songService = songService;
+    }
+
     // Create a new song
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<Song> createSong(@Valid @RequestBody Song song) {
         Song created = songService.createSong(song);
         return ResponseEntity.status(201).body(created);
     }
 
     // Get all songs
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<List<Song>> getAllSongs() {
         return ResponseEntity.ok(songService.getAllSongs());
     }

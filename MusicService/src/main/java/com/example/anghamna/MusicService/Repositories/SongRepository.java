@@ -1,7 +1,8 @@
 // SongRepository.java
-package com.spotify.music.repository;
+package com.example.anghamna.MusicService.Repositories;
 
-import com.spotify.music.model.Song;
+
+import com.example.anghamna.MusicService.Models.Song;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
