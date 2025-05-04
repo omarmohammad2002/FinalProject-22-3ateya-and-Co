@@ -3,10 +3,9 @@ package com.example.anghamna.StreamingService.Commands;
 import com.example.anghamna.StreamingService.Services.StreamService;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
-import java.io.IOException;
-import java.util.UUID;
-import com.example.anghamna.StreamingService.Services.StreamService;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class AdFreeStreamingCommand implements AudioStreamingCommand {

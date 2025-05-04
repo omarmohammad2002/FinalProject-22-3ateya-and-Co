@@ -1,26 +1,26 @@
 package com.example.anghamna.StreamingService.Services;
-import com.example.anghamna.StreamingService.Commands.*;
 
 import com.example.anghamna.StreamingService.Models.Audio;
 import com.example.anghamna.StreamingService.Repositories.AudioRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import com.example.anghamna.StreamingService.Repositories.AudioRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
 import java.util.UUID;
-
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class StreamService {
@@ -30,10 +30,11 @@ public class StreamService {
 
     private final AudioRepository audioRepository;
     private static final Logger logger = LoggerFactory.getLogger(StreamService.class);
+    private final AudioLookupService audioLookupService ;
 
-
-    public StreamService(AudioRepository audioRepository) {
+    public StreamService(AudioRepository audioRepository, AudioLookupService audioLookupService) {
         this.audioRepository = audioRepository;
+        this.audioLookupService = audioLookupService;
     }
 
 
@@ -42,10 +43,10 @@ public class StreamService {
         logger.info("➡️ Received songId: {}", songId);
         logger.info("➡️ Received rangeHeader: {}", rangeHeader);
 
-        String audioId = getAudioIdBySongId(songId);
-        logger.info("✅ Retrieved audioId from DB: {}", audioId);
+        Audio audio = audioLookupService.getAudioIdBySongId(songId);
+        logger.info("✅ Retrieved audioId from DB: {}", audio.getId());
 
-        File audioFile = getAudioFile(audioId);
+        File audioFile = audioLookupService.getAudioFile(audio);
         logger.info("📁 Audio file path resolved: {}", audioFile.getAbsolutePath());
 
         long fileSize = audioFile.length();
@@ -96,6 +97,7 @@ public class StreamService {
                         String.format("bytes %d-%d/%d", rangeStart, rangeEnd, fileSize));
 
                 logger.info("✅ Returning 206 Partial Content");
+                //increment the stream count
                 return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                         .headers(responseHeaders)
                         .body(new InputStreamResource(inputStream));
@@ -119,29 +121,13 @@ public class StreamService {
         responseHeaders.set(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileSize));
         responseHeaders.set(HttpHeaders.ACCEPT_RANGES, "bytes");
 
+        //increment the stream count
         logger.info("✅ Returning 200 OK with full file stream");
         return ResponseEntity.ok()
                 .headers(responseHeaders)
                 .body(new InputStreamResource(inputStream));
     }
 
-    public File getAudioFile(String audioId) throws IOException {
-        Audio audio = audioRepository.findById(audioId)
-                .orElseThrow(() -> new FileNotFoundException("Audio not found in DB"));
-        File audioFile = new File(audio.getFilePath());
-        if (!audioFile.exists()) {
-            throw new FileNotFoundException("Audio file not found on disk");
-        }
-        return audioFile;
-    }
-
-
-    public String getAudioIdBySongId(UUID songId) throws FileNotFoundException {
-        Audio audio = audioRepository.findBySongId(songId)
-                .orElseThrow(() -> new FileNotFoundException("Audio not found for songId: " + songId));
-        logger.info("✅ Found Audio document, internal Mongo _id: {}", audio.getId());
-        return audio.getId();
-    }
 
     public void concatenateWavFiles(File wav1, File wav2, File output) throws Exception {
         AudioInputStream clip1 = AudioSystem.getAudioInputStream(wav1);

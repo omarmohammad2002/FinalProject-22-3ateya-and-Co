@@ -1,15 +1,13 @@
 package com.example.anghamna.StreamingService.Controllers;
-
 import com.example.anghamna.StreamingService.Models.Audio;
 import com.example.anghamna.StreamingService.Services.AudioService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
@@ -40,6 +38,11 @@ public class AudioController {
                                            @RequestParam("file") MultipartFile file) throws IOException {
         Audio uploaded = audioService.uploadAudio(songId, file);
         return ResponseEntity.ok(uploaded);
+    }
+
+    @DeleteMapping("/delete/{songId}")
+    public String deleteAudio(@PathVariable UUID songId) throws IOException {
+        return audioService.deleteAudio(songId);
     }
 
 
