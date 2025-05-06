@@ -29,6 +29,7 @@ public class PostService {
     /** Get all public posts (cached) */
     @Cacheable("publicPosts")
     public List<Post> getAllPublicPosts() {
+        System.out.println("service");
         return postRepository.findByVisibility("public");
     }
 

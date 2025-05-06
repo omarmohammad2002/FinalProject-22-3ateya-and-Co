@@ -24,6 +24,7 @@ public class Post {
         this.likesCount   = 0;
         this.commentsCount= 0;
     }
+    public Post() {}
 
     // Builder
     public static class Builder {

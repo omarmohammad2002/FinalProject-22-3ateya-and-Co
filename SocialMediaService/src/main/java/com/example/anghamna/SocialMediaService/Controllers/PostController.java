@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/posts")
 public class PostController {
     @Autowired
     private PostService postService;
@@ -25,6 +25,7 @@ public class PostController {
     /** List all public posts */
     @GetMapping("/public")
     public List<Post> listPublic() {
+        System.out.println("Controller");
         return postService.getAllPublicPosts();
     }
 
