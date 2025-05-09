@@ -79,4 +79,5 @@ public class User {
     public void setUpdated_at(Instant updated_at) {
         this.updated_at = updated_at;
     }
+
 }

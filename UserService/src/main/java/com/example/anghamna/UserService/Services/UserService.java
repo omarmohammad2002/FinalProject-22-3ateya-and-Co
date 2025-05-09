@@ -39,6 +39,15 @@ public class UserService {
         return userRepository.findById(id).orElse(null);
     }
 
+    public User getUserByUsername(String username) {
+        User userName = userRepository.findByUsername(username);
+        if (userName != null) {
+            return userName;
+        } else {
+            throw new RuntimeException("User not found");
+        }
+    }
+
     public void deleteUser(UUID id) {
         userRepository.deleteById(id);
     }

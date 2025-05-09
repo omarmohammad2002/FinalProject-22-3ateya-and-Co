@@ -12,8 +12,6 @@ public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
-    @Column(length = 255, nullable = false)
-    private String token;
     private Instant expired_at;
     private Instant created_at;
 
@@ -26,12 +24,6 @@ public class Session {
     }
     public void setId(UUID id) {
         this.id = id;
-    }
-    public String getToken() {
-        return token;
-    }
-    public void setToken(String token) {
-        this.token = token;
     }
     public Instant getExpired_at() {
         return expired_at;
