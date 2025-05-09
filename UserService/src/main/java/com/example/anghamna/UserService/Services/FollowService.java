@@ -6,6 +6,7 @@ import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Repositories.FollowRepository;
 import com.example.anghamna.UserService.Repositories.UserRepository;
 import com.example.anghamna.UserService.Events.EventPublisher;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
