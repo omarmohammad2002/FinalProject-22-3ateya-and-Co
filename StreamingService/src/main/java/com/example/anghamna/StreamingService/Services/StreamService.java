@@ -1,6 +1,8 @@
 package com.example.anghamna.StreamingService.Services;
 
 import com.example.anghamna.StreamingService.Models.Audio;
+import com.example.anghamna.StreamingService.Observer.StreamCountObserver;
+import com.example.anghamna.StreamingService.Observer.StreamObservable;
 import com.example.anghamna.StreamingService.Repositories.AudioRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -31,10 +31,14 @@ public class StreamService {
     private final AudioRepository audioRepository;
     private static final Logger logger = LoggerFactory.getLogger(StreamService.class);
     private final AudioLookupService audioLookupService ;
+    private final StreamObservable streamObservable;
 
-    public StreamService(AudioRepository audioRepository, AudioLookupService audioLookupService) {
+
+    public StreamService(AudioRepository audioRepository, AudioLookupService audioLookupService, StreamObservable streamObservable, StreamCountObserver streamCountObserver) {
         this.audioRepository = audioRepository;
         this.audioLookupService = audioLookupService;
+        this.streamObservable = streamObservable ;
+        this.streamObservable.registerObserver(streamCountObserver);
     }
 
 
@@ -97,7 +101,7 @@ public class StreamService {
                         String.format("bytes %d-%d/%d", rangeStart, rangeEnd, fileSize));
 
                 logger.info("✅ Returning 206 Partial Content");
-                //increment the stream count
+                streamObservable.notifyObservers(songId);
                 return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                         .headers(responseHeaders)
                         .body(new InputStreamResource(inputStream));
@@ -121,7 +125,7 @@ public class StreamService {
         responseHeaders.set(HttpHeaders.CONTENT_LENGTH, String.valueOf(fileSize));
         responseHeaders.set(HttpHeaders.ACCEPT_RANGES, "bytes");
 
-        //increment the stream count
+        streamObservable.notifyObservers(songId);
         logger.info("✅ Returning 200 OK with full file stream");
         return ResponseEntity.ok()
                 .headers(responseHeaders)
@@ -141,5 +145,6 @@ public class StreamService {
 
         AudioSystem.write(appendedFiles, AudioFileFormat.Type.WAVE, output);
     }
+
 
 }
