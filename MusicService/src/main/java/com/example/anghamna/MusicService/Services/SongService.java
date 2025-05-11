@@ -1,7 +1,7 @@
 package com.example.anghamna.MusicService.Services;
 
 
-import com.example.anghamna.MusicService.Clients.UserClient;
+//import com.example.anghamna.MusicService.Clients.UserClient;
 import com.example.anghamna.MusicService.Models.Song;
 
 import com.example.anghamna.MusicService.Repositories.SongRepository;
@@ -29,22 +29,22 @@ public class SongService implements Subject {
     //observer
     private List<Observer> observers;
     //feign client
-    @Autowired
-    private UserClient userClient;
+//    @Autowired
+//    private UserClient userClient;
 
-    public SongService(SongRepository songRepository, MusicProducer musicProducer, UserClient userClient) {
+    public SongService(SongRepository songRepository, MusicProducer musicProducer) {
         this.songRepository = songRepository;
         this.musicProducer = musicProducer;
         this.observers = new ArrayList<>();
-        this.userClient = userClient;
+        //this.userClient = userClient;
     }
 
     public Song createSong(Song song) {
-        User user = userClient.getUserById(song.getArtistId());
-
-        if(user == null) {
-            throw new RuntimeException("User not found");
-        }
+//        User user = userClient.getUserById(song.getArtistId());
+//
+//        if(user == null) {
+//            throw new RuntimeException("User not found");
+//        }
 
         return songRepository.save(song);
     }
