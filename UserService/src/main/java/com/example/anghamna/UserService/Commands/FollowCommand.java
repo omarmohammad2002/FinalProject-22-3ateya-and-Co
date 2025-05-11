@@ -35,11 +35,13 @@ public class FollowCommand implements CommandInterface {
         follow.setCreated_at(Instant.now());
         followRepository.save(follow);
 
-        eventPublisher.publish("user.followed", Map.of(
-                "followerId", followerId.toString(),
-                "followedId", followedId.toString(),
-                "timestamp", Instant.now().toString()
-        ));
+//        eventPublisher.publish("user.followed", Map.of(
+//                "followerId", followerId.toString(),
+//                "followedId", followedId.toString(),
+//                "timestamp", Instant.now().toString()
+//        ));
+
+        eventPublisher.publishFollowEvent(followerId.toString(), followedId.toString());
 
         return true;
     }
