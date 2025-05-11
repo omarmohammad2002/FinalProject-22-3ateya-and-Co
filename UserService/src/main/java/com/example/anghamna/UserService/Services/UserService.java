@@ -5,6 +5,9 @@ import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Models.UserType;
 import com.example.anghamna.UserService.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +29,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @CachePut(value = "user_cache", key = "#result.id")
     public User registerUser(RegisterRequest request) {
         // Check if username already exists
         if (userRepository.findByUsername(request.getUsername()) != null) {
@@ -56,6 +60,7 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @CachePut(value = "user_cache",key = "#result.id")
     public User updateUser(UUID id, User userUpdate) {
         User existingUser = userRepository.findById(id).orElseThrow(() ->
                 new RuntimeException("User not found"));
@@ -84,10 +89,12 @@ public class UserService {
         return userRepository.save(existingUser);
     }
 
+    @Cacheable(value = "user_cache",key = "#id")
     public User getUserById(UUID id) {
         return userRepository.findById(id).orElse(null);
     }
 
+    @Cacheable(value = "user_cache",key = "#result.id")
     public User getUserByUsername(String username) {
         User userName = userRepository.findByUsername(username);
         if (userName != null) {
@@ -96,7 +103,7 @@ public class UserService {
             throw new RuntimeException("User not found");
         }
     }
-
+    @CacheEvict(value = "user_cache",key = "#id")
     public void deleteUser(UUID id) {
         userRepository.deleteById(id);
     }
