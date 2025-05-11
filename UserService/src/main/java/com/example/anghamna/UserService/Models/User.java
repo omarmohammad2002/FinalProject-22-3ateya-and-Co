@@ -31,6 +31,17 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Session> sessions = new ArrayList<>();
 
+    @PrePersist
+    protected void onCreate() {
+        Instant now = Instant.now();
+        created_at = now;
+        updated_at = now;
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updated_at = Instant.now();
+    }
     public UUID getId() {
         return id;
     }
@@ -78,6 +89,13 @@ public class User {
     }
     public void setUpdated_at(Instant updated_at) {
         this.updated_at = updated_at;
+    }
+    public List<Session> getSessions() {
+        return sessions;
+    }
+
+    public void setSessions(List<Session> sessions) {
+        this.sessions = sessions;
     }
 
 }

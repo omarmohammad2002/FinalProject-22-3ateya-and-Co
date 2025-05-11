@@ -1,6 +1,7 @@
 package com.example.anghamna.UserService.Controllers;
 
 
+import com.example.anghamna.UserService.DTOs.LoginRequest;
 import com.example.anghamna.UserService.Models.Session;
 import com.example.anghamna.UserService.Services.SessionService;
 import jakarta.servlet.http.Cookie;
@@ -20,8 +21,8 @@ public class SessionController {
     private SessionService sessionService;
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username, HttpServletResponse response) {
-        Session session = sessionService.login(username);
+    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
+        Session session = sessionService.login(loginRequest.getUsername(), loginRequest.getPassword());
         Cookie cookie = new Cookie("SESSION_ID", session.getId().toString());
         cookie.setHttpOnly(true);
         cookie.setPath("/"); // available to all endpoints
