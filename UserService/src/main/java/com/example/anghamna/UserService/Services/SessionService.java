@@ -28,15 +28,15 @@ public class SessionService {
         if (!BCrypt.checkpw(password, user.getPassword_hash())) {
             throw new RuntimeException("Invalid username or password");
         }
-        Session existingSession = sessionRepository.findFirstByUserAndExpired_atAfter(user, Instant.now());
+        Session existingSession = sessionRepository.findFirstByUserAndExpiredAtAfter(user, Instant.now());
         if (existingSession != null) {
             throw new RuntimeException("You are already logged in. Please log out or wait for session to expire.");
         }
 
         Session session = new Session();
         session.setUser(user);
-        session.setCreated_at(Instant.now());
-        session.setExpired_at(Instant.now().plus(2, ChronoUnit.HOURS));
+        session.setCreatedAt(Instant.now());
+        session.setExpiredAt(Instant.now().plus(2, ChronoUnit.HOURS));
 
         return sessionRepository.save(session);
     }
@@ -51,7 +51,7 @@ public class SessionService {
 
     public UUID validateSession(UUID sessionId) {
         Optional<Session> sessionOptional = sessionRepository.findById(sessionId);
-        if (sessionOptional.isEmpty() || sessionOptional.get().getExpired_at().isBefore(Instant.now())) {
+        if (sessionOptional.isEmpty() || sessionOptional.get().getExpiredAt().isBefore(Instant.now())) {
             throw new RuntimeException("Invalid or expired session.");
         }
 
