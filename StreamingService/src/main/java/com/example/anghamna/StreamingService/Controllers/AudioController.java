@@ -14,7 +14,7 @@ import java.util.UUID;
 
 
 @RestController
-@RequestMapping("/audio")
+@RequestMapping("/streaming")
 public class AudioController {
     private static final Logger logger = LoggerFactory.getLogger(AudioController.class);
     private final AudioService audioService;

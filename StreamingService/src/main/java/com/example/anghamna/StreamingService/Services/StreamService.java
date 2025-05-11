@@ -140,7 +140,7 @@ public class StreamService {
         AudioInputStream appendedFiles =
                 new AudioInputStream(
                         new SequenceInputStream(clip1, clip2),
-                        clip1.getFormat(),
+                        clip2.getFormat(),
                         clip1.getFrameLength() + clip2.getFrameLength());
 
         AudioSystem.write(appendedFiles, AudioFileFormat.Type.WAVE, output);
