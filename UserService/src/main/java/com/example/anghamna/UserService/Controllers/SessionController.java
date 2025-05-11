@@ -23,7 +23,7 @@ public class SessionController {
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         Session session = sessionService.login(loginRequest.getUsername(), loginRequest.getPassword());
-        Cookie cookie = new Cookie("SESSION_ID", session.getId().toString());
+        Cookie cookie = new Cookie("SESSION_ID", session.getId()+"");
         cookie.setHttpOnly(true);
         cookie.setPath("/"); // available to all endpoints
         cookie.setMaxAge(2 * 60 * 60); // 2 hours
@@ -41,7 +41,7 @@ public class SessionController {
     @GetMapping("/validate")
     public ResponseEntity<?> validateSession(@RequestHeader("X-Session-ID") UUID sessionId) {
         try {
-            UUID userId = sessionService.validateSession(sessionId);
+            int userId = sessionService.validateSession(sessionId);
             return ResponseEntity.ok(userId);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
