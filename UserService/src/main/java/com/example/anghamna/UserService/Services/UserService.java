@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -54,8 +55,8 @@ public class UserService {
         user.setPassword_hash(hashedPassword);
         user.setBio(request.getBio());
         user.setUser_type(userType);  // Set the user type based on the request
-        user.setCreated_at(Instant.now());
-        user.setUpdated_at(Instant.now());
+        user.setCreated_at(Date.from(Instant.now()));
+        user.setUpdated_at(Date.from(Instant.now()));
 
         return userRepository.save(user);
     }

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,8 +36,8 @@ public class SessionService {
 
         Session session = new Session();
         session.setUser(user);
-        session.setCreatedAt(Instant.now());
-        session.setExpiredAt(Instant.now().plus(2, ChronoUnit.HOURS));
+        session.setCreatedAt(Date.from(Instant.now()));
+        session.setExpiredAt(Date.from(Instant.now().plus(2, ChronoUnit.HOURS)));
 
         return sessionRepository.save(session);
     }
@@ -49,9 +50,9 @@ public class SessionService {
         sessionRepository.deleteById(sessionId);
     }
 
-    public UUID validateSession(UUID sessionId) {
+    public int validateSession(UUID sessionId) {
         Optional<Session> sessionOptional = sessionRepository.findById(sessionId);
-        if (sessionOptional.isEmpty() || sessionOptional.get().getExpiredAt().isBefore(Instant.now())) {
+        if (sessionOptional.isEmpty() || sessionOptional.get().getExpiredAt().before(Date.from(Instant.now()))) {
             throw new RuntimeException("Invalid or expired session.");
         }
 

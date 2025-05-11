@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,39 +14,41 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
+    private int id;
     @Column(length = 50, unique = true, nullable = false)
     private String username;
     @Column(length = 100, unique = true, nullable = false)
     private String email;
     @Column(length = 255, nullable = false)
     private String password_hash;
-    @Lob
+    @Column(length = 255)
     private String bio;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserType user_type;
-    private Instant created_at;
-    private Instant updated_at;
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date created_at;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date updated_at;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Session> sessions = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
         Instant now = Instant.now();
-        created_at = now;
-        updated_at = now;
+        created_at = Date.from(now);
+        updated_at = Date.from(now);
     }
 
     @PreUpdate
     protected void onUpdate() {
-        updated_at = Instant.now();
+        updated_at = Date.from(Instant.now());
     }
-    public UUID getId() {
+    public int getId() {
         return id;
     }
-    public void setId(UUID id) {
+    public void setId(int id) {
         this.id = id;
     }
     public String getUsername() {
@@ -78,16 +81,16 @@ public class User {
     public void setUser_type(UserType user_type) {
         this.user_type = user_type;
     }
-    public Instant getCreated_at() {
+    public Date getCreated_at() {
         return created_at;
     }
-    public void setCreated_at(Instant created_at) {
+    public void setCreated_at(Date created_at) {
         this.created_at = created_at;
     }
-    public Instant getUpdated_at() {
+    public Date getUpdated_at() {
         return updated_at;
     }
-    public void setUpdated_at(Instant updated_at) {
+    public void setUpdated_at(Date updated_at) {
         this.updated_at = updated_at;
     }
     public List<Session> getSessions() {
