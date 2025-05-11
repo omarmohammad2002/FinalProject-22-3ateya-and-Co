@@ -28,11 +28,13 @@ public class UnfollowCommand implements CommandInterface {
 
         followRepository.deleteByFollower_idAndFollowed_id(followerId, followedId);
 
-        eventPublisher.publish("user.unfollowed", Map.of(
-                "followerId", followerId.toString(),
-                "followedId", followedId.toString(),
-                "timestamp", Instant.now().toString()
-        ));
+//        eventPublisher.publish("user.unfollowed", Map.of(
+//                "followerId", followerId.toString(),
+//                "followedId", followedId.toString(),
+//                "timestamp", Instant.now().toString()
+//        ));
+
+        eventPublisher.publishUnfollowEvent(followerId.toString(), followedId.toString());
 
         return true;
     }

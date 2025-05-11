@@ -1,6 +1,8 @@
 package com.example.anghamna.UserService.Events;
 
+import com.example.anghamna.UserService.rabbitmq.RabbitMQConfig;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -11,14 +13,22 @@ public class EventPublisher {
 
     private final RabbitTemplate rabbitTemplate;
 
-    @Value("${rabbitmq.exchange}")
-    private String exchange;
-
+    @Autowired
     public EventPublisher(RabbitTemplate rabbitTemplate) {
         this.rabbitTemplate = rabbitTemplate;
     }
 
-    public void publish(String routingKey, Map<String, Object> payload) {
-        rabbitTemplate.convertAndSend(exchange, routingKey, payload);
+    // Publish follow event
+    public void publishFollowEvent(String followerId, String followedId) {
+        rabbitTemplate.convertAndSend(RabbitMQConfig.USER_EVENTS_EXCHANGE,
+                RabbitMQConfig.USER_FOLLOWED_ROUTING_KEY,
+                Map.of("followerId", followerId, "followedId", followedId));
+    }
+
+    // Publish unfollow event
+    public void publishUnfollowEvent(String followerId, String followedId) {
+        rabbitTemplate.convertAndSend(RabbitMQConfig.USER_EVENTS_EXCHANGE,
+                RabbitMQConfig.USER_UNFOLLOWED_ROUTING_KEY,
+                Map.of("followerId", followerId, "unfollowedId", followedId));
     }
 }
