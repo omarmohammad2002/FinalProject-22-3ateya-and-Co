@@ -6,12 +6,18 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="SocialMediaService" />
+        <module name="StreamingService" />
+        <module name="MusicService" />
         <module name="UserService" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="MusicService" options="-parameters" />
+      <module name="SocialMediaService" options="-parameters" />
+      <module name="StreamingService" options="-parameters" />
       <module name="UserService" options="-parameters" />
     </option>
   </component>

@@ -11,10 +11,11 @@ import java.util.UUID;
 public class Follow {
 
     @Id
-    private UUID follower_id;
+    @Column(name = "follower_id")
+    private int followerId;
     @Id
-    private UUID followed_id;
-    private Instant created_at;
+    @Column(name = "followed_id")
+    private int followedId;
 
     @ManyToOne
     @JoinColumn(name = "follower_id", insertable = false, updatable = false)
@@ -24,24 +25,19 @@ public class Follow {
     @JoinColumn(name = "followed_id", insertable = false, updatable = false)
     private User followed;
 
-    public UUID getFollowed_id() {
-        return followed_id;
+    public int getFollowed_id() {
+        return followedId;
     }
-    public void setFollowed_id(UUID followed_id) {
-        this.followed_id = followed_id;
+    public void setFollowed_id(int followed_id) {
+        this.followedId = followed_id;
     }
-    public UUID getFollower_id() {
-        return follower_id;
+    public int getFollower_id() {
+        return followerId;
     }
-    public void setFollower_id(UUID follower_id) {
-        this.follower_id = follower_id;
+    public void setFollower_id(int follower_id) {
+        this.followerId = follower_id;
     }
-    public Instant getCreated_at() {
-        return created_at;
-    }
-    public void setCreated_at(Instant created_at) {
-        this.created_at = created_at;
-    }
+
     public User getFollower() {
         return follower;
     }

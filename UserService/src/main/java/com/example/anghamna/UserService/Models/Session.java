@@ -3,6 +3,7 @@ package com.example.anghamna.UserService.Models;
 import jakarta.persistence.*;
 
 import java.time.Instant;
+import java.util.Date;
 import java.util.UUID;
 
 @Entity
@@ -11,40 +12,26 @@ public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID id;
-    @Column(length = 255, nullable = false)
-    private String token;
-    private Instant expired_at;
-    private Instant created_at;
-
+    private int id;
+    private Date expiredAt;
+    private Date createdAt;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public UUID getId() {
+
+    public int getId() {
         return id;
     }
-    public void setId(UUID id) {
+    public void setId(int id) {
         this.id = id;
     }
-    public String getToken() {
-        return token;
-    }
-    public void setToken(String token) {
-        this.token = token;
-    }
-    public Instant getExpired_at() {
-        return expired_at;
-    }
-    public void setExpired_at(Instant expired_at) {
-        this.expired_at = expired_at;
-    }
-    public Instant getCreated_at() {
-        return created_at;
-    }
-    public void setCreated_at(Instant created_at) {
-        this.created_at = created_at;
-    }
+    public Date getExpiredAt() { return expiredAt; }
+    public void setExpiredAt(Date expiredAt) { this.expiredAt = expiredAt; }
+
+    public Date getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
+
     public User getUser() {
         return user;
     }
