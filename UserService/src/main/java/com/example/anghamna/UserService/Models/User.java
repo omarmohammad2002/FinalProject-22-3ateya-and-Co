@@ -26,6 +26,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private UserType user_type;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date created_at;
 
@@ -81,6 +82,7 @@ public class User {
     public void setUser_type(UserType user_type) {
         this.user_type = user_type;
     }
+
     public Date getCreated_at() {
         return created_at;
     }

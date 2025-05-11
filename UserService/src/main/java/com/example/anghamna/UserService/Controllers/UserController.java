@@ -1,5 +1,4 @@
 package com.example.anghamna.UserService.Controllers;
-
 import com.example.anghamna.UserService.DTOs.RegisterRequest;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Repositories.UserRepository;
@@ -21,11 +20,11 @@ public class UserController {
         this.userService = userService;
     }
 
-
     @PostMapping("/createUser")
     public User createUser(@RequestBody User user) {
         return userService.createUser(user);
     }
+
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
