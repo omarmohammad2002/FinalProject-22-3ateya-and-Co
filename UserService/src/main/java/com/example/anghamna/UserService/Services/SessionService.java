@@ -6,6 +6,7 @@ import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Repositories.SessionRepository;
 import com.example.anghamna.UserService.Repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -22,8 +23,11 @@ public class SessionService {
     private UserService userService;
 
 
-    public Session login(String username) {
+    public Session login(String username, String password) {
         User user = userService.getUserByUsername(username);
+        if (!BCrypt.checkpw(password, user.getPassword_hash())) {
+            throw new RuntimeException("Invalid username or password");
+        }
         Session existingSession = sessionRepository.findFirstByUserAndExpired_atAfter(user, Instant.now());
         if (existingSession != null) {
             throw new RuntimeException("You are already logged in. Please log out or wait for session to expire.");
