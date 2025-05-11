@@ -12,6 +12,6 @@ import java.util.UUID;
 
 @Repository
 public interface SessionRepository extends JpaRepository<Session, UUID> {
-    Session findFirstByUserAndExpired_atAfter(User user, Instant now);
+    Session findFirstByUserAndExpiredAtAfter(User user, Instant now);
 
 }

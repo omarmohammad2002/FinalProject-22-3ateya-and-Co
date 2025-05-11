@@ -12,9 +12,8 @@ public class Session {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID id;
-    private Instant expired_at;
-    private Instant created_at;
-
+    private Instant expiredAt;
+    private Instant createdAt;
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
@@ -25,18 +24,12 @@ public class Session {
     public void setId(UUID id) {
         this.id = id;
     }
-    public Instant getExpired_at() {
-        return expired_at;
-    }
-    public void setExpired_at(Instant expired_at) {
-        this.expired_at = expired_at;
-    }
-    public Instant getCreated_at() {
-        return created_at;
-    }
-    public void setCreated_at(Instant created_at) {
-        this.created_at = created_at;
-    }
+    public Instant getExpiredAt() { return expiredAt; }
+    public void setExpiredAt(Instant expiredAt) { this.expiredAt = expiredAt; }
+
+    public Instant getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
     public User getUser() {
         return user;
     }
