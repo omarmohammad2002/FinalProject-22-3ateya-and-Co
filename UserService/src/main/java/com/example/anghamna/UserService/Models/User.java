@@ -1,5 +1,7 @@
 package com.example.anghamna.UserService.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -33,6 +35,7 @@ public class User {
     @Temporal(TemporalType.TIMESTAMP)
     private Date updated_at;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Session> sessions = new ArrayList<>();
 
     @PrePersist

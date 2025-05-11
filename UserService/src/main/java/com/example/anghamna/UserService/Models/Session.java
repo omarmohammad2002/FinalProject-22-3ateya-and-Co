@@ -1,5 +1,6 @@
 package com.example.anghamna.UserService.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.time.Instant;
