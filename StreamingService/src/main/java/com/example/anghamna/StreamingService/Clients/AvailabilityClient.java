@@ -1,4 +1,4 @@
-//package com.example.hotel.BookingService.Clients;
+//package com.example.anghamna.StreamingService.Clients;
 //
 //import org.springframework.cloud.openfeign.FeignClient;
 //import org.springframework.web.bind.annotation.GetMapping;
@@ -8,8 +8,8 @@
 //
 //public interface AvailabilityClient {
 //
-//    @GetMapping("/check/{roomType}/{nights}")
-//    boolean check(@PathVariable String roomType, @PathVariable int nights);
+//    @GetMapping("/{Users}/{id}")
+//    UserDTO getUserById (@PathVariable ("id") long id);
 //
 //
 //}
