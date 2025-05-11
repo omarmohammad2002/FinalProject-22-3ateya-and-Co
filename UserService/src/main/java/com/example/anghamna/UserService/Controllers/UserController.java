@@ -37,17 +37,17 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getUser(@PathVariable UUID id) {
+    public User getUser(@PathVariable int id) {
         return userService.getUserById(id);
     }
 
     @PutMapping("/update/{id}")
-    public User updateUser(@PathVariable UUID id, @RequestBody User user) {
+    public User updateUser(@PathVariable int id, @RequestBody User user) {
         return userService.updateUser(id, user);
     }
 
     @DeleteMapping("/delete/{id}")
-    public String deleteUser(@PathVariable UUID id) {
+    public String deleteUser(@PathVariable int id) {
         userService.deleteUser(id);
         return "User deleted";
     }

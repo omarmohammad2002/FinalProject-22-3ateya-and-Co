@@ -33,13 +33,13 @@ public class SessionController {
     }
 
     @DeleteMapping("/logout/{sessionId}")
-    public String logout(@PathVariable UUID sessionId) {
+    public String logout(@PathVariable int sessionId) {
         sessionService.logout(sessionId);
         return "Logged out successfully.";
     }
 
     @GetMapping("/validate")
-    public ResponseEntity<?> validateSession(@RequestHeader("X-Session-ID") UUID sessionId) {
+    public ResponseEntity<?> validateSession(@RequestHeader("X-Session-ID") int sessionId) {
         try {
             int userId = sessionService.validateSession(sessionId);
             return ResponseEntity.ok(userId);

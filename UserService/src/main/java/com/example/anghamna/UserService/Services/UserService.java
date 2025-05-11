@@ -61,7 +61,7 @@ public class UserService {
     }
 
     @CachePut(value = "user_cache",key = "#result.id")
-    public User updateUser(UUID id, User userUpdate) {
+    public User updateUser(int id, User userUpdate) {
         User existingUser = userRepository.findById(id).orElseThrow(() ->
                 new RuntimeException("User not found"));
 
@@ -90,7 +90,7 @@ public class UserService {
     }
 
     @Cacheable(value = "user_cache",key = "#id")
-    public User getUserById(UUID id) {
+    public User getUserById(int id) {
         return userRepository.findById(id).orElse(null);
     }
 
@@ -104,7 +104,7 @@ public class UserService {
         }
     }
     @CacheEvict(value = "user_cache",key = "#id")
-    public void deleteUser(UUID id) {
+    public void deleteUser(int id) {
         userRepository.deleteById(id);
     }
 

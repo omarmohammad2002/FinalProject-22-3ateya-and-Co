@@ -8,12 +8,12 @@ import java.util.Map;
 import java.util.UUID;
 
 public class UnfollowCommand implements CommandInterface {
-    private final UUID followerId;
-    private final UUID followedId;
+    private final int followerId;
+    private final int followedId;
     private final FollowRepository followRepository;
     private final EventPublisher eventPublisher;
 
-    public UnfollowCommand(UUID followerId, UUID followedId, FollowRepository followRepository, EventPublisher eventPublisher) {
+    public UnfollowCommand(int followerId, int followedId, FollowRepository followRepository, EventPublisher eventPublisher) {
         this.followerId = followerId;
         this.followedId = followedId;
         this.followRepository = followRepository;
@@ -22,11 +22,11 @@ public class UnfollowCommand implements CommandInterface {
 
     @Override
     public boolean execute() {
-        if (!followRepository.existsByFollower_idAndFollowed_id(followerId, followedId)) {
+        if (!followRepository.existsByFollowerIdAndFollowedId(followerId, followedId)) {
             return false;
         }
 
-        followRepository.deleteByFollower_idAndFollowed_id(followerId, followedId);
+        followRepository.deleteByFollowerIdAndFollowedId(followerId, followedId);
 
 //        eventPublisher.publish("user.unfollowed", Map.of(
 //                "followerId", followerId.toString(),
@@ -34,7 +34,7 @@ public class UnfollowCommand implements CommandInterface {
 //                "timestamp", Instant.now().toString()
 //        ));
 
-        eventPublisher.publishUnfollowEvent(followerId.toString(), followedId.toString());
+        eventPublisher.publishUnfollowEvent(Integer.toString(followerId), Integer.toString(followedId));
 
         return true;
     }

@@ -10,13 +10,13 @@ import java.util.Map;
 import java.util.UUID;
 
 public class FollowCommand implements CommandInterface {
-    private final UUID followerId;
-    private final UUID followedId;
+    private final int followerId;
+    private final int followedId;
     private final FollowRepository followRepository;
     private final EventPublisher eventPublisher;
 
 
-    public FollowCommand(UUID followerId, UUID followedId, FollowRepository followRepository, EventPublisher eventPublisher) {
+    public FollowCommand(int followerId, int followedId, FollowRepository followRepository, EventPublisher eventPublisher) {
         this.followerId = followerId;
         this.followedId = followedId;
         this.followRepository = followRepository;
@@ -25,14 +25,13 @@ public class FollowCommand implements CommandInterface {
 
     @Override
     public boolean execute() {
-        if (followerId.equals(followedId) || followRepository.existsByFollower_idAndFollowed_id(followerId, followedId)) {
+        if (followerId == followedId || followRepository.existsByFollowerIdAndFollowedId(followerId, followedId)) {
             return false;
         }
 
         Follow follow = new Follow();
         follow.setFollower_id(followerId);
         follow.setFollowed_id(followedId);
-        follow.setCreated_at(Instant.now());
         followRepository.save(follow);
 
 //        eventPublisher.publish("user.followed", Map.of(
@@ -41,7 +40,7 @@ public class FollowCommand implements CommandInterface {
 //                "timestamp", Instant.now().toString()
 //        ));
 
-        eventPublisher.publishFollowEvent(followerId.toString(), followedId.toString());
+        eventPublisher.publishFollowEvent(Integer.toString(followerId), Integer.toString(followedId));
 
         return true;
     }
