@@ -4,11 +4,23 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
+        <option value="$PROJECT_DIR$/../../final project/anghamna/anghamna/UserService/pom.xml" />
+        <option value="$PROJECT_DIR$/../../final project/anghamna/anghamna/StreamingService/pom.xml" />
+        <option value="$PROJECT_DIR$/../../final project/anghamna/anghamna/SocialMediaService/pom.xml" />
+        <option value="$PROJECT_DIR$/../../final project/anghamna/anghamna/MusicService/pom.xml" />
         <option value="$PROJECT_DIR$/MusicService/pom.xml" />
         <option value="$PROJECT_DIR$/SocialMediaService/pom.xml" />
         <option value="$PROJECT_DIR$/StreamingService/pom.xml" />
         <option value="$PROJECT_DIR$/UserService/pom.xml" />
       </list>
+    </option>
+    <option name="ignoredFiles">
+      <set>
+        <option value="$PROJECT_DIR$/../../final project/anghamna/anghamna/MusicService/pom.xml" />
+        <option value="$PROJECT_DIR$/../../final project/anghamna/anghamna/SocialMediaService/pom.xml" />
+        <option value="$PROJECT_DIR$/../../final project/anghamna/anghamna/StreamingService/pom.xml" />
+        <option value="$PROJECT_DIR$/../../final project/anghamna/anghamna/UserService/pom.xml" />
+      </set>
     </option>
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="23" project-jdk-type="JavaSDK">

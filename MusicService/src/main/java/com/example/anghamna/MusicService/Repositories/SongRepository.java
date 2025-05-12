@@ -12,12 +12,13 @@ import java.util.UUID;
 
 public interface SongRepository extends JpaRepository<Song, UUID> {
 
+
     List<Song> findByArtistId(UUID artistId);
 
     List<Song> findByGenreIgnoreCase(String genre);
 
     List<Song> findByTitleContainingIgnoreCase(String title);
 
-    @Query(value = "SELECT * FROM songs ORDER BY stream_count DESC LIMIT :limit", nativeQuery = true)
-    List<Song> findTopByOrderByStreamCountDesc(@Param("limit") int limit);
+//    @Query(value = "SELECT * FROM songs ORDER BY stream_count DESC LIMIT :limit", nativeQuery = true)
+//    List<Song> findTopByOrderByStreamCountDesc(@Param("limit") int limit);
 }

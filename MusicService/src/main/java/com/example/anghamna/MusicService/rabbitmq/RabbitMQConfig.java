@@ -14,12 +14,13 @@ import org.springframework.amqp.core.Queue;
 @Configuration
 public class RabbitMQConfig {
 
-    //exchange
+    //exchanges
     public static final String EXCHANGE = "song_exchange";
+    public static final String USER_EXCHANGE = "user_exchange";
 
     //song liked
-    public static final String SONG_LIKED_QUEUE = "song_liked_queue";
-    public static final String SONG_LIKED_ROUTING_KEY = "song_liked_routing";
+//    public static final String SONG_LIKED_QUEUE = "song_liked_queue";
+//    public static final String SONG_LIKED_ROUTING_KEY = "song_liked_routing";
 
     //song streamed
     public static final String SONG_STREAMED_QUEUE = "song_streamed_queue";
@@ -29,6 +30,10 @@ public class RabbitMQConfig {
     public static final String SONG_DELETED_QUEUE = "song_deleted_queue";
     public static final String SONG_DELETED_ROUTING_KEY = "song_deleted_routing";
 
+    //user deleted
+    public static final String USER_DELETED_QUEUE = "user_deleted_queue";
+    public static final String USER_DELETED_ROUTING_KEY = "user_deleted_routing";
+
 
     //exchange
     @Bean
@@ -36,19 +41,25 @@ public class RabbitMQConfig {
         return new TopicExchange(EXCHANGE);
     }
 
-    //song liked queue and binding
+    //user exchange
     @Bean
-    public Queue likeQueue() {
-        return new Queue(SONG_LIKED_QUEUE);
+    public TopicExchange userExchange() {
+        return new TopicExchange(USER_EXCHANGE);
     }
 
-    @Bean
-    public Binding likeBinding(Queue likeQueue, TopicExchange exchange) {
-        return BindingBuilder
-                .bind(likeQueue)
-                .to(exchange)
-                .with(SONG_LIKED_ROUTING_KEY);
-    }
+    //song liked queue and binding
+//    @Bean
+//    public Queue likeQueue() {
+//        return new Queue(SONG_LIKED_QUEUE);
+//    }
+//
+//    @Bean
+//    public Binding likeBinding(Queue likeQueue, TopicExchange exchange) {
+//        return BindingBuilder
+//                .bind(likeQueue)
+//                .to(exchange)
+//                .with(SONG_LIKED_ROUTING_KEY);
+//    }
 
 
     //song streamed queue and binding
@@ -75,6 +86,20 @@ public class RabbitMQConfig {
                 .bind(deleteQueue)
                 .to(exchange)
                 .with(SONG_DELETED_ROUTING_KEY);
+    }
+
+    //user deleted queue and binding
+    @Bean
+    public Queue userQueue() {
+        return new Queue(USER_DELETED_QUEUE);
+    }
+
+    @Bean
+    public Binding userBinding(Queue userQueue, TopicExchange userExchange) {
+        return BindingBuilder
+                .bind(userQueue)
+                .to(userExchange)
+                .with(USER_DELETED_ROUTING_KEY);
     }
 
 }
