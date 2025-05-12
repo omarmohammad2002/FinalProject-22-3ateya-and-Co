@@ -5,6 +5,7 @@ import com.example.anghamna.MusicService.Models.Song;
 import com.example.anghamna.MusicService.Services.SongService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,11 +23,12 @@ public class SongController {
         this.songService = songService;
     }
 
+
     // Create a new song
     @PostMapping("/")
     public ResponseEntity<Song> createSong(@Valid @RequestBody Song song) {
         Song created = songService.createSong(song);
-        return ResponseEntity.status(201).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // Get all songs
@@ -55,27 +57,28 @@ public class SongController {
         return ResponseEntity.ok(songService.getSongsByGenre(genre));
     }
 
-    // Search songs by title (partial match)
-    @GetMapping("/search")
-    public ResponseEntity<List<Song>> searchSongsByTitle(@RequestParam("title") String title) {
-        return ResponseEntity.ok(songService.searchSongsByTitle(title));
-    }
+//    // Search songs by title (partial match)
+//    @GetMapping("/search")
+//    public ResponseEntity<List<Song>> searchSongsByTitle(@RequestParam("title") String title) {
+//        return ResponseEntity.ok(songService.searchSongsByTitle(title));
+//    }
 
-    // Get top streamed songs
-    @GetMapping("/top-streamed")
-    public ResponseEntity<List<Song>> getTopStreamedSongs(@RequestParam(defaultValue = "10") int limit) {
-        return ResponseEntity.ok(songService.getTopStreamedSongs(limit));
-    }
+//    // Get top streamed songs
+//    @GetMapping("/top-streamed")
+//    public ResponseEntity<List<Song>> getTopStreamedSongs(@RequestParam(defaultValue = "10") int limit) {
+//        return ResponseEntity.ok(songService.getTopStreamedSongs(limit));
+//    }
 
-    // Get a random song (discover mode)
-    @GetMapping("/random")
-    public ResponseEntity<Song> getRandomSong() {
-        return songService.getRandomSong()
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.noContent().build());
-    }
+//    // Get a random song (discover mode)
+//    @GetMapping("/random")
+//    public ResponseEntity<Song> getRandomSong() {
+//        return songService.getRandomSong()
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.noContent().build());
+//    }
 
-    // Update song
+
+    //FIXME ensure the artist is the user
     @PutMapping("/{id}")
     public ResponseEntity<Song> updateSong(@PathVariable UUID id, @Valid @RequestBody Song updatedSong) {
         return songService.updateSong(id, updatedSong)
@@ -83,7 +86,48 @@ public class SongController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+//FIXME ensure you can only like once as a user
+
+    @PutMapping("/{id}/like")
+    public ResponseEntity<Song> updateSongLikeCount(@PathVariable UUID id) {
+        if (songService.likedSong(id)) {
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    //TODO update song stream count
+
+   @PutMapping("/{id}/stream")
+   public ResponseEntity<Void> updateSongStreamCount(@PathVariable UUID id) {
+       if (songService.streamedSong(id)) {
+           return ResponseEntity.ok().build();
+       } else {
+           return ResponseEntity.notFound().build();
+       }
+   }
+
+//
+//    @PutMapping("/{id}/name")
+//    public ResponseEntity<Song> updateSongName(@PathVariable UUID id, @RequestParam String name) {
+//        return songService.updateSongName(id, name)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+
+
+  //  @PutMapping("/{id}/artist")
+//    public ResponseEntity<Song> updateSongArtist(@PathVariable UUID id, @RequestParam UUID artistId) {
+//        return songService.updateSongArtist(id, artistId)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
+
+
+//FIXME the respone entities being returned?
     // Delete song
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSong(@PathVariable UUID id) {
         if (songService.deleteSong(id)) {
@@ -92,4 +136,28 @@ public class SongController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    //Delete song by artist
+
+    @DeleteMapping("/artist/{artistId}")
+    public ResponseEntity<Void> deleteSongsByArtist(@PathVariable UUID artistId) {
+        if (songService.deleteSongsByArtist(artistId)) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+//    //Delete a specific song + ensure its the user thats the artist
+
+
+//    @DeleteMapping("/artist/{artistId}/song/{songId}")
+//    public ResponseEntity<Void> deleteSongByArtist(@RequestParam UUID artistId, @RequestParam UUID songId) {
+//        if (songService.deleteSongByArtist(artistId, songId)) {
+//            return ResponseEntity.noContent().build();
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
+//    }
+
 }
