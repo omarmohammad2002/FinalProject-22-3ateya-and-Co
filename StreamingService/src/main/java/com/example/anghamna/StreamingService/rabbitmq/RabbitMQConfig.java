@@ -39,10 +39,10 @@ public class RabbitMQConfig {
         return new Queue(SONG_DELETED_QUEUE);
     }
 
-//    @Bean
-//    public Queue streamPlayedQueue() {
-//        return new Queue(STREAM_PLAYED_QUEUE);
-//    }
+    @Bean
+    public Queue streamPlayedQueue() {
+        return new Queue(STREAM_PLAYED_QUEUE);
+    }
 
     @Bean
     public Binding bindingSongAdded(Queue songAddedQueue, TopicExchange exchange) {
@@ -54,8 +54,8 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(songDeletedQueue).to(exchange).with(SONG_DELETED_ROUTING);
     }
 
-//    @Bean
-//    public Binding bindingStreamPlayed(Queue streamPlayedQueue, TopicExchange exchange) {
-//        return BindingBuilder.bind(streamPlayedQueue).to(exchange).with(STREAM_PLAYED_ROUTING);
-//    }
+    @Bean
+    public Binding bindingStreamPlayed(Queue streamPlayedQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(streamPlayedQueue).to(exchange).with(STREAM_PLAYED_ROUTING);
+    }
 }
