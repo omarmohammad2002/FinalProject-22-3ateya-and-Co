@@ -20,6 +20,7 @@ public class FollowController {
 
     @PostMapping("/follow")
     public ResponseEntity<?> follow(@RequestParam int followerId, @RequestParam int followedId) {
+
         if (followService.follow(followerId, followedId)) {
             return ResponseEntity.ok("Followed successfully");
         } else {
@@ -45,4 +46,10 @@ public class FollowController {
     public ResponseEntity<List<User>> getFollowing(@PathVariable int userId) {
         return ResponseEntity.ok(followService.getFollowing(userId));
     }
+    @GetMapping("/{userId}/following/ids")
+    public ResponseEntity<List<Integer>> getFollowingIds(@PathVariable int userId) {
+        List<Integer> followingIds = followService.getFollowingIds(userId);
+        return ResponseEntity.ok(followingIds);
+    }
+
 }

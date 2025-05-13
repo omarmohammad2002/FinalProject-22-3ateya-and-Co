@@ -40,7 +40,7 @@ public class FollowCommand implements CommandInterface {
 //                "timestamp", Instant.now().toString()
 //        ));
 
-        eventPublisher.publishFollowEvent(Integer.toString(followerId), Integer.toString(followedId));
+//        eventPublisher.publishFollowEvent(Integer.toString(followerId), Integer.toString(followedId));
 
         return true;
     }

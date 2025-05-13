@@ -22,14 +22,22 @@ public class SessionController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
-        Session session = sessionService.login(loginRequest.getUsername(), loginRequest.getPassword());
-        Cookie cookie = new Cookie("SESSION_ID", session.getId()+"");
-        cookie.setHttpOnly(true);
-        cookie.setPath("/"); // available to all endpoints
-        cookie.setMaxAge(2 * 60 * 60); // 2 hours
-        response.addCookie(cookie);
+        try {
+            Session session = sessionService.login(loginRequest.getUsername(), loginRequest.getPassword());
+            System.out.println(session);
+            Cookie cookie = new Cookie("SESSION_ID", session.getId() + "");
+            cookie.setHttpOnly(true);
+            cookie.setPath("/"); // available to all endpoints
+            cookie.setMaxAge(2 * 60 * 60); // 2 hours
+            response.addCookie(cookie);
 
-        return ResponseEntity.ok("Logged in successfully");
+            return ResponseEntity.ok("Logged in successfully");
+        }catch (Exception e) {
+            e.printStackTrace(); // Add this
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+
+
     }
 
     @DeleteMapping("/logout/{sessionId}")

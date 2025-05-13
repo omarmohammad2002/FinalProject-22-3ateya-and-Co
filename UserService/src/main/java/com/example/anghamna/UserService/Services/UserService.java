@@ -1,5 +1,6 @@
 package com.example.anghamna.UserService.Services;
 import com.example.anghamna.UserService.DTOs.RegisterRequest;
+import com.example.anghamna.UserService.DTOs.UserResponse;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Models.UserType;
 import com.example.anghamna.UserService.Repositories.UserRepository;
@@ -61,28 +62,34 @@ public class UserService {
     }
 
     @CachePut(value = "user_cache",key = "#result.id")
-    public User updateUser(int id, User userUpdate) {
+    public User updateUser(int id, RegisterRequest registerRequest) {
         User existingUser = userRepository.findById(id).orElseThrow(() ->
                 new RuntimeException("User not found"));
 
-        if (userUpdate.getUsername() != null) {
-            existingUser.setUsername(userUpdate.getUsername());
+        if (registerRequest.getUsername() != null) {
+            existingUser.setUsername(registerRequest.getUsername());
         }
 
-        if (userUpdate.getEmail() != null) {
-            existingUser.setEmail(userUpdate.getEmail());
+        if (registerRequest.getEmail() != null) {
+            existingUser.setEmail(registerRequest.getEmail());
         }
 
-        if (userUpdate.getUser_type() != null) {
-            existingUser.setUser_type(userUpdate.getUser_type());
+        UserType userType;
+        try {
+            userType = UserType.valueOf(registerRequest.getUser_type().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid user type");
         }
 
-        if (userUpdate.getBio() != null) {
-            existingUser.setBio(userUpdate.getBio());
+        if (registerRequest.getUser_type() != null) {
+            existingUser.setUser_type(userType);
         }
 
-        if (userUpdate.getPassword_hash() != null && !userUpdate.getPassword_hash().isBlank()) {
-            String hashed = BCrypt.hashpw(userUpdate.getPassword_hash(), BCrypt.gensalt());
+        if (registerRequest.getBio() != null) {
+            existingUser.setBio(registerRequest.getBio());
+        }
+        if (registerRequest.getPassword() != null && !registerRequest.getPassword().isBlank()) {
+            String hashed = BCrypt.hashpw(registerRequest.getPassword(), BCrypt.gensalt());
             existingUser.setPassword_hash(hashed);
         }
 
@@ -93,7 +100,11 @@ public class UserService {
     public User getUserById(int id) {
         return userRepository.findById(id).orElse(null);
     }
-
+    public UserResponse getUserByIdE(int id) {
+        User user = getUserById(id);
+        return user != null ? new UserResponse(user) : null;
+    }
+//caching by3ml moshkla
     @Cacheable(value = "user_cache",key = "#result.id")
     public User getUserByUsername(String username) {
         User userName = userRepository.findByUsername(username);

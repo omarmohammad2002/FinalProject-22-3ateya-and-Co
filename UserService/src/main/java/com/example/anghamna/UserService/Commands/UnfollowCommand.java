@@ -2,6 +2,8 @@ package com.example.anghamna.UserService.Commands;
 
 import com.example.anghamna.UserService.Events.EventPublisher;
 import com.example.anghamna.UserService.Repositories.FollowRepository;
+import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.Instant;
 import java.util.Map;
@@ -34,8 +36,12 @@ public class UnfollowCommand implements CommandInterface {
 //                "timestamp", Instant.now().toString()
 //        ));
 
-        eventPublisher.publishUnfollowEvent(Integer.toString(followerId), Integer.toString(followedId));
+//        eventPublisher.publishUnfollowEvent(Integer.toString(followerId), Integer.toString(followedId));
 
         return true;
     }
+
+
 }
+
+

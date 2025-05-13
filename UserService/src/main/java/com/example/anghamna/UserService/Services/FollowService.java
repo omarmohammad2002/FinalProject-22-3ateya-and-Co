@@ -48,11 +48,23 @@ public class FollowService {
                 .map(Follow::getFollower)
                 .toList();
     }
+//    public List<User> getFollowersIds(int userId) {
+//        return followRepository.findByFollowedId(userId).stream()
+//                .map(Follow::getFollower)
+//                .toList();
+//    }
 
     public List<User> getFollowing(int userId) {
         return followRepository.findByFollowerId(userId).stream()
                 .map(Follow::getFollowed)
                 .toList();
     }
+
+    public List<Integer> getFollowingIds(int userId) {
+        return followRepository.findByFollowerId(userId).stream()
+                .map(follow -> follow.getFollowed().getId())
+                .toList();
+    }
+
 }
 

@@ -1,6 +1,7 @@
 package com.example.anghamna.UserService.Controllers;
 
 import com.example.anghamna.UserService.DTOs.RegisterRequest;
+import com.example.anghamna.UserService.DTOs.UserResponse;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,18 +42,23 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getUser(@PathVariable int id) {
-        User user = userService.getUserById(id);
-        if (user != null) {
-            return ResponseEntity.ok(user);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with ID: " + id);
+        try{
+            UserResponse user = userService.getUserByIdE(id);
+            if (user != null) {
+                return ResponseEntity.ok(user);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with ID: " + id);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Add this
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable int id, @RequestBody User user) {
+    public ResponseEntity<?> updateUser(@PathVariable int id, @RequestBody RegisterRequest registerRequest) {
         try {
-            User updatedUser = userService.updateUser(id, user);
+            User updatedUser = userService.updateUser(id, registerRequest);
             return ResponseEntity.ok(updatedUser);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
