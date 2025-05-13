@@ -4,6 +4,6 @@ WORKDIR /app
 
 COPY target/*.jar target/MusicService.jar
 
-EXPOSE 8080
+EXPOSE 8082
 
 ENTRYPOINT ["java", "-jar", "target/MusicService.jar"]

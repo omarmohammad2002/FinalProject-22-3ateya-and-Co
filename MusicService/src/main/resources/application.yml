@@ -3,13 +3,13 @@ spring:
     name: anghamna
 
   rabbitmq:
-    host: localhost
+    host: rabbitmq
     port: 5672
     username: guest
     password: guest
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/music
+    url: jdbc:postgresql://postgres:5432/music
     username: postgres
     password: 1234
     driver-class-name: org.postgresql.Driver
