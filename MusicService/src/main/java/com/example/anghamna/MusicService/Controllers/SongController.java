@@ -99,14 +99,16 @@ public class SongController {
 
     //TODO update song stream count
 
-   @PutMapping("/{id}/stream")
-   public ResponseEntity<Void> updateSongStreamCount(@PathVariable UUID id) {
-       if (songService.streamedSong(id)) {
-           return ResponseEntity.ok().build();
-       } else {
-           return ResponseEntity.notFound().build();
-       }
-   }
+    //FIXME to be uncommented
+
+//   @PutMapping("/{id}/stream")
+//   public ResponseEntity<Void> updateSongStreamCount(@PathVariable String message) {
+//       if (songService.streamedSong(message)) {
+//           return ResponseEntity.ok().build();
+//       } else {
+//           return ResponseEntity.notFound().build();
+//       }
+//   }
 
 //
 //    @PutMapping("/{id}/name")
