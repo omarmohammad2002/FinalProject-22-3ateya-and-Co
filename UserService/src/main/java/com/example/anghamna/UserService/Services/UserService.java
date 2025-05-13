@@ -1,6 +1,7 @@
 package com.example.anghamna.UserService.Services;
 import com.example.anghamna.UserService.DTOs.RegisterRequest;
 import com.example.anghamna.UserService.DTOs.UserResponse;
+import com.example.anghamna.UserService.Events.EventPublisher;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Models.UserType;
 import com.example.anghamna.UserService.Repositories.UserRepository;
@@ -18,10 +19,12 @@ import java.util.UUID;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private EventPublisher eventPublisher;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, EventPublisher eventPublisher) {
         this.userRepository = userRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     public User createUser(User user) {
@@ -116,7 +119,11 @@ public class UserService {
     }
     @CacheEvict(value = "user_cache",key = "#id")
     public void deleteUser(int id) {
+
         userRepository.deleteById(id);
+
+        eventPublisher.publishUserDeletedEvent( id );
+
     }
 
 }

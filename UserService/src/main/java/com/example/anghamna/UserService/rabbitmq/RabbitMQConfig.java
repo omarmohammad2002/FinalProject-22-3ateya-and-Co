@@ -18,12 +18,13 @@ public class RabbitMQConfig {
     public static final String USER_EVENTS_EXCHANGE = "user.events";
     public static final String SOCIAL_EVENTS_EXCHANGE = "social.events";
 
-    // Define routing keys for follow/unfollow events
-    public static final String USER_FOLLOWED_ROUTING_KEY = "user.followed";
-    public static final String USER_UNFOLLOWED_ROUTING_KEY = "user.unfollowed";
+    public static String MUSIC_EVENT_EXCHANGE = "music.events";
 
-    // Define queue names for follow/unfollow
-    public static final String SOCIAL_MEDIA_QUEUE = "social_media.user_followed";
+
+    public static final String USER_DELETED_ROUTING_KEY = "user.deleted";
+
+
+    public static final String MUSIC_USER_DELETED_QUEUE = "music.user_deleted";
 
     // Declare the Exchange for user events
     @Bean
@@ -32,33 +33,18 @@ public class RabbitMQConfig {
     }
 
     // Declare the Social exchange for social-related events
-    @Bean
-    public TopicExchange socialEventsExchange() {
-        return new TopicExchange(SOCIAL_EVENTS_EXCHANGE);
-    }
-
-    // Declare queue for the social media service to listen to follow/unfollow events
-    @Bean
-    public Queue socialMediaQueue() {
-        return new Queue(SOCIAL_MEDIA_QUEUE);
-    }
-
-    // Bind queue to exchange for the follow/unfollow routing key
-    @Bean
-    public Binding socialMediaBinding(Queue socialMediaQueue, TopicExchange userEventsExchange) {
-        return BindingBuilder
-                .bind(socialMediaQueue)
-                .to(userEventsExchange)
-                .with(USER_FOLLOWED_ROUTING_KEY);
-    }
+//    @Bean
+//    public TopicExchange socialEventsExchange() {
+//        return new TopicExchange(SOCIAL_EVENTS_EXCHANGE);
+//    }
 
     @Bean
-    public Binding socialMediaUnfollowBinding(Queue socialMediaQueue, TopicExchange userEventsExchange) {
-        return BindingBuilder
-                .bind(socialMediaQueue)
-                .to(userEventsExchange)
-                .with(USER_UNFOLLOWED_ROUTING_KEY);
+    public TopicExchange musicEventsExchange(){
+        return  new TopicExchange(MUSIC_EVENT_EXCHANGE);
     }
+
+
+
 
 
 
