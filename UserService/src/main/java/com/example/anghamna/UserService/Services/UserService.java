@@ -1,6 +1,5 @@
 package com.example.anghamna.UserService.Services;
 import com.example.anghamna.UserService.DTOs.RegisterRequest;
-import com.example.anghamna.UserService.DTOs.UserResponse;
 import com.example.anghamna.UserService.Events.EventPublisher;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Models.UserType;
