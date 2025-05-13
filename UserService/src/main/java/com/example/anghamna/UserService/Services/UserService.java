@@ -3,7 +3,9 @@ import com.example.anghamna.UserService.DTOs.RegisterRequest;
 import com.example.anghamna.UserService.DTOs.UserResponse;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Models.UserType;
+import com.example.anghamna.UserService.Repositories.FollowRepository;
 import com.example.anghamna.UserService.Repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -18,10 +20,13 @@ import java.util.UUID;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final FollowRepository followRepository;
+
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, FollowRepository followRepository) {
         this.userRepository = userRepository;
+        this.followRepository = followRepository;
     }
 
     public User createUser(User user) {
@@ -114,9 +119,24 @@ public class UserService {
             throw new RuntimeException("User not found");
         }
     }
+    public UserResponse getUserByUsernameE(String username) {
+        User user = getUserByUsername(username);
+        return user != null ? new UserResponse(user) : null;
+    }
+
+    @Transactional
     @CacheEvict(value = "user_cache",key = "#id")
     public void deleteUser(int id) {
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Delete follow records where the user is follower or followed
+        followRepository.deleteByFollowerId(id);
+        followRepository.deleteByFollowedId(id);
+
+        // Now safely delete the user
+        userRepository.delete(user);
     }
+
 
 }
