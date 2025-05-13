@@ -1,11 +1,28 @@
-#server:
-#  port: 8092
-#
-#spring:
-#  application:
-#    name: NotificationService
-#  rabbitmq:
-#    host: localhost
-#    port: 5672
-#    username: guest
-#    password: guest
+server:
+  port: 8080
+
+spring:
+  application:
+    name: StreamingService
+  data:
+    mongodb:
+      uri: mongodb://root:example@mongo:27017/3ateya_and_Co?authSource=admin
+      database: 3ateya_and_Co
+    redis:
+      host: redis_cache
+      port: 6379
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+  cache:
+    type: redis
+  rabbitmq:
+    host: rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+
+media:
+  storage:
+    path: /app/media

@@ -13,5 +13,5 @@ public class SongAddedEvent {
     public void setSongId(UUID songId) { this.songId = songId; }
 
     public MultipartFile getFile() { return file; }
-    public void setFilePath(MultipartFile filePath) { this.file = filePath; }
+    public void setFile(MultipartFile file) { this.file = file; }
 }

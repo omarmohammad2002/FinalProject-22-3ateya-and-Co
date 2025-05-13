@@ -5,6 +5,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
 public interface AudioStreamingCommand {
-    ResponseEntity<InputStreamResource> execute(UUID songId, String rangeHeader ) throws Exception;
+    ResponseEntity<InputStreamResource> execute(UUID songId, String rangeHeader) throws Exception;
 }
 
