@@ -1,6 +1,5 @@
 package com.example.anghamna.UserService.Services;
 import com.example.anghamna.UserService.DTOs.RegisterRequest;
-import com.example.anghamna.UserService.DTOs.UserResponse;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Models.UserType;
 import com.example.anghamna.UserService.Repositories.FollowRepository;
@@ -105,12 +104,8 @@ public class UserService {
     public User getUserById(int id) {
         return userRepository.findById(id).orElse(null);
     }
-    public UserResponse getUserByIdE(int id) {
-        User user = getUserById(id);
-        return user != null ? new UserResponse(user) : null;
-    }
-//caching by3ml moshkla
-    @Cacheable(value = "user_cache",key = "#result.id")
+
+    @Cacheable(value = "user_cache", key = "#username")
     public User getUserByUsername(String username) {
         User userName = userRepository.findByUsername(username);
         if (userName != null) {
@@ -119,10 +114,6 @@ public class UserService {
             throw new RuntimeException("User not found");
         }
     }
-    public UserResponse getUserByUsernameE(String username) {
-        User user = getUserByUsername(username);
-        return user != null ? new UserResponse(user) : null;
-    }
 
     @Transactional
     @CacheEvict(value = "user_cache",key = "#id")
@@ -130,11 +121,9 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Delete follow records where the user is follower or followed
         followRepository.deleteByFollowerId(id);
         followRepository.deleteByFollowedId(id);
 
-        // Now safely delete the user
         userRepository.delete(user);
     }
 

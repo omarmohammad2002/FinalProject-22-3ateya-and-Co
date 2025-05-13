@@ -1,7 +1,6 @@
 package com.example.anghamna.UserService.Controllers;
 
 import com.example.anghamna.UserService.DTOs.RegisterRequest;
-import com.example.anghamna.UserService.DTOs.UserResponse;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,11 +42,26 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getUser(@PathVariable int id) {
         try{
-            UserResponse user = userService.getUserByIdE(id);
+            User user = userService.getUserById(id);
             if (user != null) {
                 return ResponseEntity.ok(user);
             } else {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with ID: " + id);
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Add this
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/username/{username}")
+    public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
+        try{
+            User user = userService.getUserByUsername(username);
+            if (user != null) {
+                return ResponseEntity.ok(user);
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found with Username: " + username);
             }
         } catch (Exception e) {
             e.printStackTrace(); // Add this
