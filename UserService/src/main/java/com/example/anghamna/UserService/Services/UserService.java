@@ -1,5 +1,7 @@
 package com.example.anghamna.UserService.Services;
 import com.example.anghamna.UserService.DTOs.RegisterRequest;
+import com.example.anghamna.UserService.DTOs.UserResponse;
+import com.example.anghamna.UserService.Events.EventPublisher;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Models.UserType;
 import com.example.anghamna.UserService.Repositories.FollowRepository;
@@ -20,12 +22,15 @@ import java.util.UUID;
 public class UserService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
+    private EventPublisher eventPublisher;
 
 
     @Autowired
-    public UserService(UserRepository userRepository, FollowRepository followRepository) {
+    public UserService(UserRepository userRepository, FollowRepository followRepository, EventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.followRepository = followRepository;
+        this.eventPublisher = eventPublisher;
+
     }
 
     public User createUser(User user) {
@@ -118,6 +123,7 @@ public class UserService {
     @Transactional
     @CacheEvict(value = "user_cache",key = "#id")
     public void deleteUser(int id) {
+
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -125,6 +131,8 @@ public class UserService {
         followRepository.deleteByFollowedId(id);
 
         userRepository.delete(user);
+        eventPublisher.publishUserDeletedEvent( id );
+
     }
 
 
