@@ -14,10 +14,11 @@ public class StreamEventProducer {
     private RabbitTemplate rabbitTemplate;
 
     public void sendStreamPlayed(UUID songID) {
+        String message = songID.toString();
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE,
                 RabbitMQConfig.STREAM_PLAYED_ROUTING,
-                songID
+                message
         );
         System.out.println("Sent stream played event: " + songID);
     }

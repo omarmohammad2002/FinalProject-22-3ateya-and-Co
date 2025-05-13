@@ -41,7 +41,8 @@ public class AudioService {
     }
 
     @RabbitListener(queues = RabbitMQConfig.SONG_DELETED_QUEUE)
-    public void handleSongDeleted(UUID songId) throws IOException {
+    public void handleSongDeleted(String message) throws IOException {
+        UUID songId = UUID.fromString(message);
         System.out.println("Received request to delete song: " + songId);
         deleteAudio(songId);
     }
@@ -81,7 +82,7 @@ public class AudioService {
         return command.execute(songId, rangeHeader);
     }
 
-    @CacheEvict(value="audio", key = "#songId")
+//    @CacheEvict(value="audio", key = "#songId")
     public String deleteAudio(UUID songId) throws IOException {
         Audio audio = audioLookupService.getAudioIdBySongId(songId) ;
         File file = audioLookupService.getAudioFile(audio) ;

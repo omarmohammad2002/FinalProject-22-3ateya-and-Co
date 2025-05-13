@@ -9,6 +9,8 @@ import com.example.anghamna.MusicService.Repositories.SongRepository;
 import com.example.anghamna.MusicService.observers.Subject;
 import com.example.anghamna.MusicService.rabbitmq.MusicProducer;
 import com.example.anghamna.MusicService.rabbitmq.RabbitMQConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -16,7 +18,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import com.example.anghamna.MusicService.observers.Observer;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -27,6 +30,7 @@ public class SongService implements Subject {
     private final SongRepository songRepository;
     @Autowired
     private final PlaylistService playlistService;
+    private static final Logger logger = LoggerFactory.getLogger(SongService.class);
 
     @Autowired
     private MusicProducer musicProducer;
@@ -132,13 +136,14 @@ public class SongService implements Subject {
 
     //rabbitmq
     @RabbitListener(queues = RabbitMQConfig.SONG_STREAMED_QUEUE)
-    public boolean streamedSong(UUID id) {
+    public void streamedSong(String message) {
+        UUID id = UUID.fromString(message);
         Song song = songRepository.findById(id).orElse(null);
-        if (song == null) return false ;
+        if (song == null) return  ;
         song.setStreamCount(song.getStreamCount() + 1);
-
+        logger.info("🎧 Stream event received for songId: {}", id);
         songRepository.save(song);
-        return true;
+
     }
 
     @RabbitListener(queues = RabbitMQConfig.USER_DELETED_QUEUE)
