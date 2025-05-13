@@ -7,7 +7,7 @@ services:
       - "8084:8080"
     depends_on:
       - mongo
-      - rabbitmq
+#      - rabbitmq
     volumes:
       - ./media:/app/media
     environment:
@@ -42,26 +42,26 @@ services:
       - mongo
 
 
-  redis_cache:
-    image: redis:latest
-    container_name: redisCache
-    ports:
-      - "6379:6379"
+#  redis_cache:
+#    image: redis:latest
+#    container_name: redisCache
+#    ports:
+#      - "6379:6379"
+#
+#  redisinsight:
+#    image: redis/redisinsight:latest
+#    container_name: redisInsight
+#    ports:
+#      - "5540:5540"
+#    restart: always
 
-  redisinsight:
-    image: redis/redisinsight:latest
-    container_name: redisInsight
-    ports:
-      - "5540:5540"
-    restart: always
-
-  rabbitmq:
-    image: rabbitmq:4.0-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"     # RabbitMQ protocol (AMQP)
-      - "15672:15672"   # Management UI
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
+#  rabbitmq:
+#    image: rabbitmq:4.0-management
+#    container_name: rabbitmq
+#    ports:
+#      - "5672:5672"     # RabbitMQ protocol (AMQP)
+#      - "15672:15672"   # Management UI
+#    environment:
+#      RABBITMQ_DEFAULT_USER: guest
+#      RABBITMQ_DEFAULT_PASS: guest
 
