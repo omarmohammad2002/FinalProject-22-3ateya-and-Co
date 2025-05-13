@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cache.annotation.EnableCaching;
 
 @SpringBootApplication
-@EnableFeignClients
+//@EnableFeignClients
 @EnableCaching
 public class UserServiceApplication {
 
