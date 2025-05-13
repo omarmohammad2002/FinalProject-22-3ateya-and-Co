@@ -3,6 +3,7 @@ package com.example.anghamna.UserService.Commands;
 import com.example.anghamna.UserService.Events.EventPublisher;
 import com.example.anghamna.UserService.Repositories.FollowRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.time.Instant;
@@ -23,6 +24,7 @@ public class UnfollowCommand implements CommandInterface {
     }
 
     @Override
+    @Transactional
     public boolean execute() {
         if (!followRepository.existsByFollowerIdAndFollowedId(followerId, followedId)) {
             return false;

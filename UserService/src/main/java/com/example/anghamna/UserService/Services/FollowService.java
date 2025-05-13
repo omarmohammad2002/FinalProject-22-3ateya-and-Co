@@ -9,6 +9,7 @@ import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Repositories.FollowRepository;
 import com.example.anghamna.UserService.Repositories.UserRepository;
 import com.example.anghamna.UserService.Events.EventPublisher;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,6 +39,7 @@ public class FollowService {
         return commandExecutor.runCommand(command);
     }
 
+    @Transactional
     public boolean unfollow(int followerId, int followedId) {
         UnfollowCommand command = new UnfollowCommand(followerId, followedId, followRepository, eventPublisher);
         return commandExecutor.runCommand(command);

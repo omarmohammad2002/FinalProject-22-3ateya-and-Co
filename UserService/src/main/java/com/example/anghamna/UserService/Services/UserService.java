@@ -4,7 +4,9 @@ import com.example.anghamna.UserService.DTOs.UserResponse;
 import com.example.anghamna.UserService.Events.EventPublisher;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Models.UserType;
+import com.example.anghamna.UserService.Repositories.FollowRepository;
 import com.example.anghamna.UserService.Repositories.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -19,12 +21,16 @@ import java.util.UUID;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final FollowRepository followRepository;
     private EventPublisher eventPublisher;
 
+
     @Autowired
-    public UserService(UserRepository userRepository, EventPublisher eventPublisher) {
+    public UserService(UserRepository userRepository, FollowRepository followRepository, EventPublisher eventPublisher) {
         this.userRepository = userRepository;
+        this.followRepository = followRepository;
         this.eventPublisher = eventPublisher;
+
     }
 
     public User createUser(User user) {
@@ -103,12 +109,8 @@ public class UserService {
     public User getUserById(int id) {
         return userRepository.findById(id).orElse(null);
     }
-    public UserResponse getUserByIdE(int id) {
-        User user = getUserById(id);
-        return user != null ? new UserResponse(user) : null;
-    }
-//caching by3ml moshkla
-    @Cacheable(value = "user_cache",key = "#result.id")
+
+    @Cacheable(value = "user_cache", key = "#username")
     public User getUserByUsername(String username) {
         User userName = userRepository.findByUsername(username);
         if (userName != null) {
@@ -117,13 +119,21 @@ public class UserService {
             throw new RuntimeException("User not found");
         }
     }
+
+    @Transactional
     @CacheEvict(value = "user_cache",key = "#id")
     public void deleteUser(int id) {
 
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        followRepository.deleteByFollowerId(id);
+        followRepository.deleteByFollowedId(id);
+
+        userRepository.delete(user);
         eventPublisher.publishUserDeletedEvent( id );
 
     }
+
 
 }
