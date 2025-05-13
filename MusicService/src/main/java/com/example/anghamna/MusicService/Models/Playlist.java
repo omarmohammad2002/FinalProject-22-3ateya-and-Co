@@ -3,11 +3,13 @@ package com.example.anghamna.MusicService.Models;
 
 import com.example.anghamna.MusicService.Models.Song;
 import com.example.anghamna.MusicService.Repositories.SongRepository;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -34,14 +36,14 @@ public class Playlist {
 
     @CreationTimestamp
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Date updatedAt;
 
 
-
+    @JsonIgnore
     @ManyToMany
     @JoinTable(
             name = "playlist_songs",
@@ -57,9 +59,9 @@ public class Playlist {
         this.name = name;
         this.ownerId = ownerId;
         this.isPrivate = isPrivate;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = Date.from(Instant.now());
         this.songs.add(song);
-         this.updatedAt = LocalDateTime.now();
+         this.updatedAt = Date.from(Instant.now());
 
     }
 
@@ -67,15 +69,15 @@ public class Playlist {
         this.name = name;
         this.ownerId = ownerId;
         this.isPrivate = isPrivate;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = Date.from(Instant.now());
         this.songs = songs;
-       this.updatedAt = LocalDateTime.now();
+       this.updatedAt = Date.from(Instant.now());
 
     }
 
 
 
-    public Playlist(String name, UUID ownerId, boolean isPrivate, LocalDateTime createdAt) {
+    public Playlist(String name, UUID ownerId, boolean isPrivate, Date createdAt) {
         this.name = name;
         this.ownerId = ownerId;
         this.isPrivate = isPrivate;
@@ -117,19 +119,19 @@ public class Playlist {
         this.isPrivate = isPrivate;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(LocalDateTime createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
+    public Date getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(LocalDateTime updatedAt) {
+    public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
     }
 

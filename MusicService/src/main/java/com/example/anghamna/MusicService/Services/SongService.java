@@ -62,17 +62,17 @@ public class SongService implements Subject {
         return songRepository.findAll();
     }
 
-    @Cacheable(value = "song_cache",key = "#id")
+    @Cacheable(value = "songs",key = "#id")
     public Optional<Song> getSongById(UUID id) {
         return songRepository.findById(id);
     }
 
-    @Cacheable(value = "song_cache",key = "'artist_' + #artistId")
+    @Cacheable(value = "songs",key = "'artist_' + #artistId")
     public List<Song> getSongsByArtist(UUID artistId) {
         return songRepository.findByArtistId(artistId);
     }
 
-    @Cacheable(value = "song_cache",key = "'genre_' + #genre.toLowerCase()")
+    @Cacheable(value = "songs",key = "'genre_' + #genre.toLowerCase()")
     public List<Song> getSongsByGenre(String genre) {
         return songRepository.findByGenreIgnoreCase(genre);
     }
@@ -82,7 +82,7 @@ public class SongService implements Subject {
 //    public List<Song> searchSongsByTitle(String title) {
 //        return songRepository.findByTitleContainingIgnoreCase(title);
 //    }
-    @CachePut(value = "song_cache",key = "#id")
+    @CachePut(value = "songs",key = "#id")
     public Optional<Song> updateSong(UUID id, Song updatedSong) {
         return songRepository.findById(id).map(existingSong -> {
             existingSong.setTitle(updatedSong.getTitle());
@@ -93,7 +93,7 @@ public class SongService implements Subject {
         });
     }
 
-    @CacheEvict(value = "song_cache", key = "#id")
+    @CacheEvict(value = "songs", key = "#id")
     public boolean deleteSong(UUID id) {
         if (songRepository.existsById(id)) {
             songRepository.deleteById(id);

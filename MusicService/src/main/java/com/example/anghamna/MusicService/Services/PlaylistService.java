@@ -45,13 +45,13 @@ public class PlaylistService {
         return playlistRepository.findAll();
     }
 
-    @Cacheable(value = "playlist_cache",key = "#id")
+    @Cacheable(value = "playlists",key = "#id")
     public Optional<Playlist> getPlaylistById(UUID id) {
         //FIXME should check if its private and if the user is the owner
         return playlistRepository.findById(id);
     }
 
-    @Cacheable(value = "playlist_cache",key = "#ownerId")
+    @Cacheable(value = "playlists",key = "#ownerId")
     public List<Playlist> getPlaylistsByUserId(UUID ownerId) {
         // should check if its private and if the user is the owner
         return playlistRepository.findByOwnerId(ownerId);
@@ -72,7 +72,7 @@ public class PlaylistService {
 //    }
 
 
-    @CachePut(value="playlist_cache",key="#id")
+    @CachePut(value="playlists",key="#id")
     public Optional<Playlist> updatePlaylist(UUID playlistId, Playlist playlist) {
 
     return playlistRepository.findById(playlistId)
@@ -87,7 +87,7 @@ public class PlaylistService {
     // DELETE
 
     //FIXME retrieve user id from cookie and verify with owner of playlist to delete
-    @CacheEvict(value = "playlist_cache", key = "#id")
+    @CacheEvict(value = "playlists", key = "#id")
     public void deletePlaylist(UUID id, UUID ownerId) {
         if (!playlistRepository.existsByIdAndOwnerId(id, ownerId)) {
             throw new NoSuchElementException("Playlist not found");
