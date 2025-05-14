@@ -59,8 +59,8 @@ public class PlaylistController {
 
     // Get user playlists
 
-    @GetMapping("/")
-    public ResponseEntity<List<Playlist>> getUserPlaylists(@RequestParam("userId") UUID userId) {
+    @GetMapping("/user/{id}")
+    public ResponseEntity<List<Playlist>> getUserPlaylists(@PathVariable("id") UUID userId) {
         return ResponseEntity.ok(playlistService.getPlaylistsByUserId(userId));
     }
 
@@ -98,22 +98,21 @@ public class PlaylistController {
     }
 
     //FIXME check who owns it and only they can toggle privacy
-    @PatchMapping("/{id}/privacy")
-    public ResponseEntity<Void> togglePrivacy(
+    @PatchMapping("privacy/{id}/{userId}")
+    public void togglePrivacy(
             @PathVariable UUID id,
-            @RequestHeader() UUID userId) { //FIXME is this how itll be passed
+            @PathVariable() UUID userId) { //FIXME is this how itll be passed
         playlistService.togglePrivacy(id, userId);
-        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{playlistId}/add")
-    public void addSong(@PathVariable UUID playlistId, @RequestParam UUID songId) {
+    public void addSong(@PathVariable UUID playlistId, @RequestBody() UUID songId) {
         AddSongCommand addCommand = new AddSongCommand(playlistRepository,songRepository, playlistId, songId);
         playlistService.addSong(addCommand);
     }
 
     @DeleteMapping("/{playlistId}/remove")
-    public void removeSong(@PathVariable UUID playlistId, @RequestParam UUID songId) {
+    public void removeSong(@PathVariable UUID playlistId, @RequestBody() UUID songId) {
         RemoveSongCommand removeCommand = new RemoveSongCommand(playlistRepository, songRepository, playlistId, songId);
         playlistService.removeSong(removeCommand);
     }

@@ -6,6 +6,7 @@ import com.example.anghamna.MusicService.Models.Song;
 
 import com.example.anghamna.MusicService.Repositories.PlaylistRepository;
 import com.example.anghamna.MusicService.Repositories.SongRepository;
+import com.example.anghamna.MusicService.observers.SongObserver;
 import com.example.anghamna.MusicService.observers.Subject;
 import com.example.anghamna.MusicService.rabbitmq.MusicProducer;
 import com.example.anghamna.MusicService.rabbitmq.RabbitMQConfig;
@@ -35,15 +36,15 @@ public class SongService implements Subject {
     @Autowired
     private MusicProducer musicProducer;
     //observer
-    private List<Observer> observers;
+    private SongObserver songObserver;
     //feign client
 //    @Autowired
 //    private UserClient userClient;
 
-    public SongService(SongRepository songRepository, MusicProducer musicProducer, PlaylistService playlistService) {
+    public SongService(SongRepository songRepository, MusicProducer musicProducer, PlaylistService playlistService, SongObserver songObserver) {
         this.songRepository = songRepository;
         this.musicProducer = musicProducer;
-        this.observers = new ArrayList<>();
+        this.songObserver = songObserver;
         this.playlistService = playlistService;
         //this.userClient = userClient; //FIXME we need to fetch it from the request or cookie?
     }
@@ -100,7 +101,7 @@ public class SongService implements Subject {
             playlistService.deleteSongFromAllPlaylists(id);
 
             //notify streaming service that song is deleted
-            musicProducer.sendSongDeleted(id);
+            //musicProducer.sendSongDeleted(id);
             //notify observers
             notifyObservers(id);
 
@@ -166,21 +167,21 @@ public class SongService implements Subject {
 
 
     //observer
-    @Override
-    public void registerObserver(Observer o){
-        observers.add(o);
-    }
-
-    @Override
-    public void removeObserver(Observer o){
-        observers.remove(o);
-    }
+//    @Override
+//    public void registerObserver(Observer o){
+//        observers.add(o);
+//    }
+//
+//    @Override
+//    public void removeObserver(Observer o){
+//        observers.remove(o);
+//    }
 
     @Override
     public void notifyObservers(UUID songId) {
-        for (Observer observer : observers) {
-            observer.onSongDeleted(songId);
-        }
+        //for (Observer observer : observers) {
+        songObserver.onSongDeleted(songId);
+        //}
     }
 
 

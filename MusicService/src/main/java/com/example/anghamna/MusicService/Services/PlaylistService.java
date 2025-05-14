@@ -51,7 +51,7 @@ public class PlaylistService {
         return playlistRepository.findById(id);
     }
 
-    @Cacheable(value = "playlists",key = "#ownerId")
+   // @Cacheable(value = "playlists",key = "#ownerId")
     public List<Playlist> getPlaylistsByUserId(UUID ownerId) {
         // should check if its private and if the user is the owner
         return playlistRepository.findByOwnerId(ownerId);
@@ -72,14 +72,14 @@ public class PlaylistService {
 //    }
 
 
-    @CachePut(value="playlists",key="#id")
+    @CachePut(value="playlists",key="#playlistId")
     public Optional<Playlist> updatePlaylist(UUID playlistId, Playlist playlist) {
 
     return playlistRepository.findById(playlistId)
                 .map(existingPlaylist -> {
                     existingPlaylist.setName(playlist.getName());
                     existingPlaylist.setPrivate(playlist.isPrivate());
-                    existingPlaylist.setSongs(playlist.getSongs());
+                    existingPlaylist.setOwnerId(playlist.getOwnerId());
                     return playlistRepository.save(existingPlaylist);
                 });
     }
@@ -95,14 +95,18 @@ public class PlaylistService {
         playlistRepository.deleteById(id);
     }
 
+    //TODO fix this entire method bec it sends back 404
+    public void togglePrivacy(UUID id, UUID ownerId) {
+        Playlist playlist = playlistRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Playlist not found"));
 
-  public void togglePrivacy(UUID id, UUID ownerId) {
-      Playlist playlist = playlistRepository.findByIdAndOwnerId(id, ownerId)
-              .orElseThrow(() -> new NoSuchElementException("Playlist not found"));
-
-      playlist.setPrivate(!playlist.isPrivate());
-      playlistRepository.save(playlist);
-  }
+        if (playlist.getOwnerId().equals(ownerId)) {
+            playlist.setPrivate(!playlist.isPrivate());
+            playlistRepository.save(playlist);
+        } else {
+            throw new SecurityException("You do not own this playlist.");
+        }
+    }
 
     public void addSong(AddSongCommand command) {
             command.execute();

@@ -77,12 +77,12 @@ public class Playlist {
 
 
 
-    public Playlist(String name, UUID ownerId, boolean isPrivate, Date createdAt) {
+    public Playlist(String name, UUID ownerId, boolean isPrivate) {
         this.name = name;
         this.ownerId = ownerId;
         this.isPrivate = isPrivate;
-        this.createdAt = createdAt;
-        this.updatedAt = createdAt;
+        this.createdAt = Date.from(Instant.now());
+        this.updatedAt = Date.from(Instant.now());
 
     }
 
