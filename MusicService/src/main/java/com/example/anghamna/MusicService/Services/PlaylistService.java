@@ -51,13 +51,11 @@ public class PlaylistService {
         return playlistRepository.findById(id);
     }
 
-   // @Cacheable(value = "playlists",key = "#ownerId")
+    @Cacheable(value = "playlists",key = "#ownerId")
     public List<Playlist> getPlaylistsByUserId(UUID ownerId) {
         // should check if its private and if the user is the owner
         return playlistRepository.findByOwnerId(ownerId);
     }
-
-
 
 
     // return all public playlists
@@ -72,7 +70,7 @@ public class PlaylistService {
 //    }
 
 
-    @CachePut(value="playlists",key="#playlistId")
+    @CachePut(value="playlists",key="#result.id")
     public Optional<Playlist> updatePlaylist(UUID playlistId, Playlist playlist) {
 
     return playlistRepository.findById(playlistId)
