@@ -49,7 +49,7 @@ public class SessionService {
         sessionRepository.deleteById(sessionId);
     }
 
-    public int validateSession(int sessionId) {
+    public UUID validateSession(int sessionId) {
         Optional<Session> sessionOptional = sessionRepository.findById(sessionId);
         if (sessionOptional.isEmpty() || sessionOptional.get().getExpiredAt().before(Date.from(Instant.now()))) {
             throw new RuntimeException("Invalid or expired session.");

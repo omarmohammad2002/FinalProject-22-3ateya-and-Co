@@ -15,8 +15,9 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(columnDefinition = "UUID DEFAULT gen_random_uuid()")
+    private UUID id;
     @Column(length = 50, unique = true, nullable = false)
     private String username;
     @Column(length = 100, unique = true, nullable = false)
@@ -49,10 +50,10 @@ public class User {
     protected void onUpdate() {
         updated_at = Date.from(Instant.now());
     }
-    public int getId() {
+    public UUID getId() {
         return id;
     }
-    public void setId(int id) {
+    public void setId(UUID id) {
         this.id = id;
     }
     public String getUsername() {

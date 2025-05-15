@@ -10,13 +10,13 @@ import java.util.Map;
 import java.util.UUID;
 
 public class FollowCommand implements CommandInterface {
-    private final int followerId;
-    private final int followedId;
+    private final UUID followerId;
+    private final UUID followedId;
     private final FollowRepository followRepository;
     private final EventPublisher eventPublisher;
 
 
-    public FollowCommand(int followerId, int followedId, FollowRepository followRepository, EventPublisher eventPublisher) {
+    public FollowCommand(UUID followerId, UUID followedId, FollowRepository followRepository, EventPublisher eventPublisher) {
         this.followerId = followerId;
         this.followedId = followedId;
         this.followRepository = followRepository;

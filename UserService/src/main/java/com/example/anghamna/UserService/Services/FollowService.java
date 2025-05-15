@@ -34,18 +34,18 @@ public class FollowService {
         this.commandExecutor = new CommandExecutor(); // or inject if needed
     }
 
-    public boolean follow(int followerId, int followedId) {
+    public boolean follow(UUID followerId, UUID followedId) {
         FollowCommand command = new FollowCommand(followerId, followedId, followRepository, eventPublisher);
         return commandExecutor.runCommand(command);
     }
 
     @Transactional
-    public boolean unfollow(int followerId, int followedId) {
+    public boolean unfollow(UUID followerId, UUID followedId) {
         UnfollowCommand command = new UnfollowCommand(followerId, followedId, followRepository, eventPublisher);
         return commandExecutor.runCommand(command);
     }
 
-    public List<User> getFollowers(int userId) {
+    public List<User> getFollowers(UUID userId) {
         return followRepository.findByFollowedId(userId).stream()
                 .map(Follow::getFollower)
                 .toList();
@@ -56,13 +56,13 @@ public class FollowService {
 //                .toList();
 //    }
 
-    public List<User> getFollowing(int userId) {
+    public List<User> getFollowing(UUID userId) {
         return followRepository.findByFollowerId(userId).stream()
                 .map(Follow::getFollowed)
                 .toList();
     }
 
-    public List<Integer> getFollowingIds(int userId) {
+    public List<UUID> getFollowingIds(UUID userId) {
         return followRepository.findByFollowerId(userId).stream()
                 .map(follow -> follow.getFollowed().getId())
                 .toList();

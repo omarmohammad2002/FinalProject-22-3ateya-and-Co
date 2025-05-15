@@ -12,10 +12,10 @@ public class Follow {
 
     @Id
     @Column(name = "follower_id")
-    private int followerId;
+    private UUID followerId;
     @Id
     @Column(name = "followed_id")
-    private int followedId;
+    private UUID followedId;
 
     @ManyToOne
     @JoinColumn(name = "follower_id", insertable = false, updatable = false)
@@ -25,16 +25,16 @@ public class Follow {
     @JoinColumn(name = "followed_id", insertable = false, updatable = false)
     private User followed;
 
-    public int getFollowed_id() {
+    public UUID getFollowed_id() {
         return followedId;
     }
-    public void setFollowed_id(int followed_id) {
+    public void setFollowed_id(UUID followed_id) {
         this.followedId = followed_id;
     }
-    public int getFollower_id() {
+    public UUID getFollower_id() {
         return followerId;
     }
-    public void setFollower_id(int follower_id) {
+    public void setFollower_id(UUID follower_id) {
         this.followerId = follower_id;
     }
 

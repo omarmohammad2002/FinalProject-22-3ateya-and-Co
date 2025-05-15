@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class EventPublisher {
@@ -32,7 +33,7 @@ public class EventPublisher {
 //                Map.of("followerId", followerId, "unfollowedId", followedId));
 //    }
 
-    public void publishUserDeletedEvent(int userId){
+    public void publishUserDeletedEvent(UUID userId){
         rabbitTemplate.convertAndSend(RabbitMQConfig.MUSIC_EVENT_EXCHANGE,
                 RabbitMQConfig.USER_DELETED_ROUTING_KEY,
                 Map.of("userId", userId));
