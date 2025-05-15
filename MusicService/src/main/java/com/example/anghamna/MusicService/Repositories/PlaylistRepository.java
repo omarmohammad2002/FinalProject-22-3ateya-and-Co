@@ -1,7 +1,9 @@
 package com.example.anghamna.MusicService.Repositories;
 
 import com.example.anghamna.MusicService.Models.Playlist;
+import com.example.anghamna.MusicService.Models.Song;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -22,4 +24,8 @@ public interface PlaylistRepository extends JpaRepository<Playlist, UUID> {
 
     @Query("SELECT CASE WHEN COUNT(p) > 0 THEN true ELSE false END FROM Playlist p WHERE p.id = :id AND p.ownerId = :ownerId")
     boolean existsByIdAndOwnerId(@Param("id") UUID id, @Param("ownerId") UUID ownerId);
+
+    @Modifying
+    @Query(value = "DELETE FROM playlist_songs WHERE song_id = :songId", nativeQuery = true)
+    void deleteSongFromAllPlaylists(@Param("songId") UUID songId);
 }

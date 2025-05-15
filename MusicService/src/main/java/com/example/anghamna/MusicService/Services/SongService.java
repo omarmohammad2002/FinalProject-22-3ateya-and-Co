@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import com.example.anghamna.MusicService.observers.Observer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -94,11 +95,13 @@ public class SongService implements Subject {
         });
     }
 
+    @Transactional
     @CacheEvict(value = "songs", key = "#id")
     public boolean deleteSong(UUID id) {
         if (songRepository.existsById(id)) {
-            songRepository.deleteById(id);
             playlistService.deleteSongFromAllPlaylists(id);
+            songRepository.deleteById(id);
+
 
             //notify streaming service that song is deleted
             //musicProducer.sendSongDeleted(id);

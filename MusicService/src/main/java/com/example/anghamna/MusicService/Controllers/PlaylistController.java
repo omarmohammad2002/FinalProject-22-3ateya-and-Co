@@ -40,12 +40,10 @@ public class PlaylistController {
 
     //Create a playlist
     @PostMapping
-    public ResponseEntity<Playlist> createPlaylist(
-            @Valid @RequestBody Playlist request)
-          //  @RequestHeader("X-User-ID") Long userId)
+    public ResponseEntity<Playlist> createPlaylist(@RequestBody Playlist playlist)
     {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(playlistService.createPlaylist(request/*, userId*/));
+        Playlist created = playlistService.createPlaylist(playlist);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // Get Playlist by ID
@@ -69,6 +67,12 @@ public class PlaylistController {
     public ResponseEntity<List<Playlist>> getPublicPlaylists() {
         return ResponseEntity.ok(playlistService.getPublicPlaylists());
     }
+
+    @GetMapping("/playlistSongs/{id}")
+    public ResponseEntity<List<Song>> getPlaylistSongs(@PathVariable UUID id) {
+        return ResponseEntity.ok(playlistService.getPlaylistSongs(id));
+    }
+
 
 
 

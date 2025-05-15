@@ -43,8 +43,8 @@ public class Playlist {
     private Date updatedAt;
 
 
-    @JsonIgnore
-    @ManyToMany
+
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "playlist_songs",
             joinColumns = @JoinColumn(name = "playlist_id"),
@@ -60,8 +60,10 @@ public class Playlist {
         this.ownerId = ownerId;
         this.isPrivate = isPrivate;
         this.createdAt = Date.from(Instant.now());
+        this.songs = new ArrayList<Song>();
         this.songs.add(song);
-         this.updatedAt = Date.from(Instant.now());
+        this.updatedAt = Date.from(Instant.now());
+
 
     }
 
@@ -71,20 +73,21 @@ public class Playlist {
         this.isPrivate = isPrivate;
         this.createdAt = Date.from(Instant.now());
         this.songs = songs;
-       this.updatedAt = Date.from(Instant.now());
-
-    }
-
-
-
-    public Playlist(String name, UUID ownerId, boolean isPrivate) {
-        this.name = name;
-        this.ownerId = ownerId;
-        this.isPrivate = isPrivate;
-        this.createdAt = Date.from(Instant.now());
         this.updatedAt = Date.from(Instant.now());
 
     }
+
+
+
+//    public Playlist(String name, UUID ownerId, boolean isPrivate) {
+//        this.name = name;
+//        this.ownerId = ownerId;
+//        this.isPrivate = isPrivate;
+//        this.createdAt = Date.from(Instant.now());
+//        this.updatedAt = Date.from(Instant.now());
+//        this.songs = new ArrayList<Song>();
+//
+//    }
 
     // Getters and Setters
     public UUID getId() {

@@ -6,6 +6,7 @@ import com.example.anghamna.MusicService.Models.Song;
 import com.example.anghamna.MusicService.Repositories.PlaylistRepository;
 import com.example.anghamna.MusicService.Models.Playlist;
 //import lombok.RequiredArgsConstructor;
+import com.example.anghamna.MusicService.Repositories.SongRepository;
 import com.example.anghamna.MusicService.command.AddSongCommand;
 import com.example.anghamna.MusicService.command.PlaylistCommand;
 import com.example.anghamna.MusicService.command.RemoveSongCommand;
@@ -15,10 +16,8 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+
+import java.util.*;
 
 
 @Service
@@ -28,6 +27,8 @@ public class PlaylistService {
     @Autowired
     private final PlaylistRepository playlistRepository;
 
+    @Autowired private SongRepository songRepository;
+
 
     public PlaylistService(PlaylistRepository playlistRepository) {
         this.playlistRepository = playlistRepository;
@@ -35,10 +36,23 @@ public class PlaylistService {
     // CREATE
 
     public Playlist createPlaylist(Playlist playlist) {
-//        if (playlistRepository.existsByNameAndOwnerId(playlist.getName(), playlist.getOwnerId())) {
-//            throw new DuplicateResourceException("Playlist name already exists");
-//        }
-        return playlistRepository.save(playlist);
+        List<Song> inputSongs = playlist.getSongs();
+        if (inputSongs != null && !inputSongs.isEmpty()) {
+            List<UUID> songIds = inputSongs.stream()
+                    .map(Song::getId)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            List<Song> managedSongs = songRepository.findAllById(songIds);
+            playlist.setSongs(managedSongs); // Only set managed ones
+        }
+
+        Playlist savedPlaylist = playlistRepository.save(playlist);
+
+        // EAGER fetch is safer if you directly return JPA entities
+        savedPlaylist.getSongs().size(); // force loading if LAZY
+
+        return savedPlaylist;
     }
 
     public List<Playlist> getAllPlaylists() {
@@ -68,6 +82,14 @@ public class PlaylistService {
 //    public List<Playlist> getPrivatePlaylists() {
 //        return playlistRepository.findByIsPrivate(true);
 //    }
+
+
+    public List<Song> getPlaylistSongs(UUID playlistId) {
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new RuntimeException("Playlist not found"));
+
+        return playlist.getSongs();
+    }
 
 
     @CachePut(value="playlists",key="#result.id")
@@ -118,12 +140,7 @@ public class PlaylistService {
 
 
     public void deleteSongFromAllPlaylists(UUID songId){
-        List<Playlist> playlists = playlistRepository.findAll();
-        for (Playlist playlist : playlists) {
-            if (playlist.getSongs().removeIf(song -> song.getId().equals(songId))) {
-                playlistRepository.save(playlist);
-            }
-        }
+        playlistRepository.deleteSongFromAllPlaylists(songId);
     }
 
 

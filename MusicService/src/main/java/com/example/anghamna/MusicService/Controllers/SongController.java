@@ -1,7 +1,9 @@
 package com.example.anghamna.MusicService.Controllers;
 
 
+import com.example.anghamna.MusicService.Models.Playlist;
 import com.example.anghamna.MusicService.Models.Song;
+import com.example.anghamna.MusicService.Services.PlaylistService;
 import com.example.anghamna.MusicService.Services.SongService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,8 @@ public class SongController {
 
     @Autowired
     private final SongService songService;
+
+
 
     public SongController(SongService songService) {
         this.songService = songService;
@@ -55,6 +59,12 @@ public class SongController {
     @GetMapping("/genre/{genre}")
     public ResponseEntity<List<Song>> getSongsByGenre(@PathVariable String genre) {
         return ResponseEntity.ok(songService.getSongsByGenre(genre));
+    }
+
+
+    @GetMapping("/getPlaylists/{songId}")
+    public List<Playlist> getPlaylistsBySongId(@PathVariable UUID songId) {
+        return songService.getSongById(songId).get().getPlaylists();
     }
 
 //    // Search songs by title (partial match)

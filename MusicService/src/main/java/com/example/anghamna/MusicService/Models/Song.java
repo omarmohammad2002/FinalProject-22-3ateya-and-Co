@@ -1,5 +1,6 @@
 package com.example.anghamna.MusicService.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -40,12 +41,11 @@ public class Song {
 
     private int streamCount = 0;
 
-    @JsonIgnore
-    @ManyToMany(mappedBy = "songs")
+//    @JsonBackReference
+    @ManyToMany(mappedBy = "songs", cascade = CascadeType.ALL)
     private List<Playlist> playlists;
 
-    //FIXME revise with omar if we need it, we need to store the song url or have user?
-    private String songURL;
+
     // when they call upload song we call on both create song in both services?
     // or should this service send it to sttreaming and pass the strong id when we create it
 // we need to add the songURL field to the constructor and getters/setters
@@ -159,4 +159,11 @@ public class Song {
         this.streamCount = streamCount;
     }
 
+    public List<Playlist> getPlaylists() {
+        return playlists;
+    }
+
+    public void setPlaylists(List<Playlist> playlists) {
+        this.playlists = playlists;
+    }
 }
