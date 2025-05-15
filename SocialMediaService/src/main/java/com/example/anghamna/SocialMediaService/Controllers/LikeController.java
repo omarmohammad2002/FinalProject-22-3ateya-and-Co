@@ -7,19 +7,22 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/likes")
 public class LikeController {
+
     @Autowired
     private LikeService likeService;
 
+    /** Like a post using Command (internally calls Reflection) */
     @PostMapping("/{postId}/like")
     public String likePost(@PathVariable String postId, @RequestParam String userId) {
-        LikeService.LikeCommand command = likeService.new LikePostCommand(postId, userId);
+        LikeService.LikeCommand command = likeService.new DynamicLikeCommand("like", postId, userId);
         command.execute();
         return "Post liked successfully.";
     }
 
+    /** Unlike a post using Command (internally calls Reflection) */
     @DeleteMapping("/{postId}/unlike")
     public String unlikePost(@PathVariable String postId, @RequestParam String userId) {
-        LikeService.LikeCommand command = likeService.new UnlikePostCommand(postId, userId);
+        LikeService.LikeCommand command = likeService.new DynamicLikeCommand("unlike", postId, userId);
         command.execute();
         return "Post unliked successfully.";
     }

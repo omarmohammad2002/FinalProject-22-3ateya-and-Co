@@ -8,26 +8,28 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
 @Service
 public class LikeService {
+
     @Autowired
     private LikeRepository likeRepository;
+
     @Autowired
     private PostRepository postRepository;
 
-    /** Check if a user liked a post (cached) */
     @Cacheable(value = "likeStatus", key = "#postId + '_' + #userId")
     public boolean isPostLikedByUser(String postId, String userId) {
         return likeRepository.findByPostIdAndUserId(postId, userId).isPresent();
     }
 
-    /** Like a post and evict the cached like status */
     @CacheEvict(value = "likeStatus", key = "#postId + '_' + #userId")
     public void likePost(String postId, String userId) {
         likeRepository.findByPostIdAndUserId(postId, userId).ifPresentOrElse(
-                like -> {
-                    // Already liked — do nothing
-                },
+                like -> {},
                 () -> {
                     likeRepository.save(new Like(postId, userId));
                     postRepository.findById(postId).ifPresent(post -> {
@@ -44,45 +46,39 @@ public class LikeService {
             likeRepository.delete(like);
             postRepository.findById(postId).ifPresent(post -> {
                 int currentLikes = post.getLikesCount();
-                post.setLikesCount(Math.max(0, currentLikes - 1)); // Prevent negative values
+                post.setLikesCount(Math.max(0, currentLikes - 1));
                 postRepository.save(post);
             });
         });
     }
 
-    // --- Command Pattern interfaces and implementations ---
+    // ----------------------------
+    // Command Pattern with Reflection Inside
+    // ----------------------------
 
     public interface LikeCommand {
         void execute();
     }
 
-    public class LikePostCommand implements LikeCommand {
-        private String postId;
-        private String userId;
+    public class DynamicLikeCommand implements LikeCommand {
+        private final String postId;
+        private final String userId;
+        private final String action; // "like" or "unlike"
 
-        public LikePostCommand(String postId, String userId) {
+        public DynamicLikeCommand(String action, String postId, String userId) {
+            this.action = action;
             this.postId = postId;
             this.userId = userId;
         }
 
         @Override
         public void execute() {
-            likePost(postId, userId);
-        }
-    }
-
-    public class UnlikePostCommand implements LikeCommand {
-        private String postId;
-        private String userId;
-
-        public UnlikePostCommand(String postId, String userId) {
-            this.postId = postId;
-            this.userId = userId;
-        }
-
-        @Override
-        public void execute() {
-            unlikePost(postId, userId);
+            try {
+                Method method = LikeService.class.getMethod(action + "Post", String.class, String.class);
+                method.invoke(LikeService.this, postId, userId);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to execute action: " + action, e);
+            }
         }
     }
 }
