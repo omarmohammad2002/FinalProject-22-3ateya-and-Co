@@ -76,9 +76,8 @@ public class AudioService {
         return audioRepository.findAll();
     }
 
-    public ResponseEntity<InputStreamResource> streamAudioController(UUID songId, String rangeHeader, long userID) throws Exception {
-//        String userType = userClient.getUserTypeById(userID);
-        String userType = "premium" ;
+    public ResponseEntity<InputStreamResource> streamAudioController(UUID songId, String rangeHeader, UUID userID) throws Exception {
+        String userType = userClient.getUserTypeById(userID);
         AudioStreamingCommand command = streamingCommandInvoker.getCommand(userType);
         return command.execute(songId, rangeHeader);
     }

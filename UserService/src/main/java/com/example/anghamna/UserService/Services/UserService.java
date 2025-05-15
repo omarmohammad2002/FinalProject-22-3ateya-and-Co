@@ -130,7 +130,7 @@ public class UserService {
         followRepository.deleteByFollowedId(id);
 
         userRepository.delete(user);
-        eventPublisher.publishUserDeletedEvent(id);
+//        eventPublisher.publishUserDeletedEvent(id);
 
     }
 

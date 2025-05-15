@@ -30,10 +30,10 @@ public class EventPublisher {
 //    public void publishUnfollowEvent(String followerId, String followedId) {
 //        rabbitTemplate.convertAndSend(RabbitMQConfig.USER_EVENTS_EXCHANGE,
 //                RabbitMQConfig.USER_UNFOLLOWED_ROUTING_KEY,
-//                Map.of("followerId", followerId, "unfollowedId", followedId));
+//                Map.of("followerId", followerId, "unfollowssedId", followedId));
 //    }
 
-    public void publishUserDeletedEvent(int userId){
+    public void publishUserDeletedEvent(UUID userId){
      //FIXME change userID type from int to UUID
 
         UUID hardcodedArtistID = UUID.fromString("b35a6f2c-972c-4dd3-876c-45a3a5ce0d1f");
