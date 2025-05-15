@@ -48,10 +48,25 @@ public class SessionController {
 
 
     @DeleteMapping("/logout/{sessionId}")
-    public String logout(@PathVariable int sessionId) {
+    public ResponseEntity<String> logout(@PathVariable int sessionId, HttpServletResponse response) {
         sessionService.logout(sessionId);
-        return "Logged out successfully.";
+
+        // Delete SESSION_ID cookie
+        Cookie sessionCookie = new Cookie("SESSION_ID", null);
+        sessionCookie.setHttpOnly(true);
+        sessionCookie.setPath("/");
+        sessionCookie.setMaxAge(0); // Delete immediately
+        response.addCookie(sessionCookie);
+
+        // Delete USER_ID cookie
+        Cookie userIdCookie = new Cookie("USER_ID", null);
+        userIdCookie.setPath("/");
+        userIdCookie.setMaxAge(0); // Delete immediately
+        response.addCookie(userIdCookie);
+
+        return ResponseEntity.ok("Logged out successfully.");
     }
+
 
     @GetMapping("/validate")
     public ResponseEntity<?> validateSession(@RequestHeader("X-Session-ID") int sessionId) {

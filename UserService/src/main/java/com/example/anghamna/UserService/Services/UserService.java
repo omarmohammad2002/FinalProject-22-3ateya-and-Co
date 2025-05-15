@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -131,7 +132,16 @@ public class UserService {
 
         userRepository.delete(user);
 //        eventPublisher.publishUserDeletedEvent(id);
+    }
 
+    public String getUserType(UUID id) {
+        User user = userRepository.findById(id).orElseThrow(() ->
+                new RuntimeException("User not found"));
+        return user.getUser_type().toString();
+    }
+
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
 
