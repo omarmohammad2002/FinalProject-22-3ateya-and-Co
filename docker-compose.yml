@@ -1,6 +1,107 @@
-version: "3.8"
 
 services:
+  # PostgreSQL for User Service
+  postgres_users:
+    image: postgres
+    container_name: postgres_users
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: users
+    ports:
+      - "5432:5432"
+    restart: always
+
+  # PostgreSQL for Music Service
+  postgres_music:
+    image: postgres
+    container_name: postgres_music
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: music
+    ports:
+      - "5433:5432"  # exposed as 5433 on host
+    restart: always
+
+  # Redis Cache
+  redis_cache:
+    image: redis:latest
+    container_name: shared-redis-cache
+    ports:
+      - "6379:6379"
+    restart: always
+
+  # Redis Insight
+  redisinsight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    ports:
+      - "5540:5540"
+    restart: always
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:4.0-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    restart: always
+
+  # MongoDB
+  mongo:
+    image: mongo
+    container_name: mongo_streaming
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: 3ateya_and_Co
+    ports:
+      - "27017:27017"
+    restart: always
+
+  # Mongo Express
+  mongo-express:
+    image: mongo-express
+    container_name: mongo_express_streaming
+    ports:
+      - "9000:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: pass
+    depends_on:
+      - mongo
+    restart: always
+
+  # User Service
+  user-app:
+    build:
+      context: ./UserService
+      dockerfile: Dockerfile
+    container_name: userApp
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres_users
+      - redis_cache
+      - rabbitmq
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_users:5432/users
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_DATA_REDIS_HOST: redis_cache
+      SPRING_DATA_REDIS_PORT: 6379
+    restart: always
+
+  # Music Service
   music-service:
     build:
       context: ./MusicService
@@ -9,28 +110,18 @@ services:
     ports:
       - "8082:8080"
     depends_on:
-      - postgres
+      - postgres_music
       - redis_cache
       - rabbitmq
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/music
-      - SPRING_DATASOURCE_USERNAME=postgres
-      - SPRING_DATASOURCE_PASSWORD=1234
-      - SPRING_DATA_REDIS_HOST=redis_cache
-      - SPRING_DATA_REDIS_PORT=6379
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_music:5432/music
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 1234
+      SPRING_DATA_REDIS_HOST: redis_cache
+      SPRING_DATA_REDIS_PORT: 6379
     restart: always
 
-  postgres:
-    image: postgres
-    container_name: music-postgres
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=1234
-      - POSTGRES_DB=music
-    restart: always
-
+  # Streaming Service
   streaming-service:
     build:
       context: ./StreamingService
@@ -46,54 +137,4 @@ services:
     environment:
       - spring.data.mongodb.uri=mongodb://root:example@mongo:27017/3ateya_and_Co?authSource=admin
       - spring.data.mongodb.database=3ateya_and_Co
-    restart: always
-
-  mongo:
-    image: mongo
-    container_name: mongo_streaming
-    restart: always
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: example
-      MONGO_INITDB_DATABASE: 3ateya_and_Co
-    ports:
-      - "27017:27017"
-
-  mongo-express:
-    image: mongo-express
-    container_name: mongo_express_streaming
-    restart: always
-    ports:
-      - "9000:8081"
-    environment:
-      ME_CONFIG_MONGODB_SERVER: mongo
-      ME_CONFIG_MONGODB_PORT: 27017
-      ME_CONFIG_MONGODB_ADMINUSERNAME: root
-      ME_CONFIG_MONGODB_ADMINPASSWORD: example
-      ME_CONFIG_BASICAUTH_USERNAME: admin
-      ME_CONFIG_BASICAUTH_PASSWORD: pass
-    depends_on:
-      - mongo
-
-  rabbitmq:
-    image: rabbitmq:4.0-management
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-
-  redis_cache:
-    image: redis:latest
-    container_name: redis_cache
-    ports:
-      - "6379:6379"
-
-  redisinsight:
-    image: redis/redisinsight:latest
-    container_name: redisInsight
-    ports:
-      - "5540:5540"
     restart: always

@@ -1,10 +1,13 @@
 package com.example.anghamna.MusicService.Models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,16 +30,17 @@ public class Song {
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    private Date createdAt;
 
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Date updatedAt;
 
     private int likeCount = 0;
 
     private int streamCount = 0;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "songs")
     private List<Playlist> playlists;
 
@@ -45,7 +49,8 @@ public class Song {
     // when they call upload song we call on both create song in both services?
     // or should this service send it to sttreaming and pass the strong id when we create it
 // we need to add the songURL field to the constructor and getters/setters
-
+    //Instant now = Instant.now();
+    //        created_at = Date.from(now);
     
     // Constructors
     public Song() {}
@@ -57,10 +62,11 @@ public class Song {
         this.duration = duration;
         this.likeCount = 0;
         this.streamCount = 0;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = Date.from(Instant.now());
+        this.updatedAt = Date.from(Instant.now());
 
     }
+
 
     public Song(String title, UUID artistId, String genre, int duration, int likeCount, int streamCount) {
         this.title = title;
@@ -69,12 +75,12 @@ public class Song {
         this.duration = duration;
         this.likeCount = likeCount;
         this.streamCount = streamCount;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = Date.from(Instant.now());
+        this.updatedAt = Date.from(Instant.now());
 
     }
 
-    public Song(UUID id, String title, UUID artistId, String genre, int duration, LocalDateTime createdAt, int likeCount, int streamCount) {
+    public Song(UUID id, String title, UUID artistId, String genre, int duration, Date createdAt, int likeCount, int streamCount) {
         this.id = id;
         this.title = title;
         this.artistId = artistId;
@@ -129,11 +135,11 @@ public class Song {
         this.duration = duration;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
+    public Date getUpdatedAt() {
         return updatedAt;
     }
 

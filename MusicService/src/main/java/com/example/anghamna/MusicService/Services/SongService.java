@@ -6,6 +6,7 @@ import com.example.anghamna.MusicService.Models.Song;
 
 import com.example.anghamna.MusicService.Repositories.PlaylistRepository;
 import com.example.anghamna.MusicService.Repositories.SongRepository;
+import com.example.anghamna.MusicService.observers.SongObserver;
 import com.example.anghamna.MusicService.observers.Subject;
 import com.example.anghamna.MusicService.rabbitmq.MusicProducer;
 import com.example.anghamna.MusicService.rabbitmq.RabbitMQConfig;
@@ -35,15 +36,15 @@ public class SongService implements Subject {
     @Autowired
     private MusicProducer musicProducer;
     //observer
-    private List<Observer> observers;
+    private SongObserver songObserver;
     //feign client
 //    @Autowired
 //    private UserClient userClient;
 
-    public SongService(SongRepository songRepository, MusicProducer musicProducer, PlaylistService playlistService) {
+    public SongService(SongRepository songRepository, MusicProducer musicProducer, PlaylistService playlistService, SongObserver songObserver) {
         this.songRepository = songRepository;
         this.musicProducer = musicProducer;
-        this.observers = new ArrayList<>();
+        this.songObserver = songObserver;
         this.playlistService = playlistService;
         //this.userClient = userClient; //FIXME we need to fetch it from the request or cookie?
     }
@@ -62,17 +63,17 @@ public class SongService implements Subject {
         return songRepository.findAll();
     }
 
-    @Cacheable(value = "song_cache",key = "#id")
+    @Cacheable(value = "songs",key = "#id")
     public Optional<Song> getSongById(UUID id) {
         return songRepository.findById(id);
     }
 
-    @Cacheable(value = "song_cache",key = "'artist_' + #artistId")
+    @Cacheable(value = "songs",key = "'artist_' + #artistId")
     public List<Song> getSongsByArtist(UUID artistId) {
         return songRepository.findByArtistId(artistId);
     }
 
-    @Cacheable(value = "song_cache",key = "'genre_' + #genre.toLowerCase()")
+    @Cacheable(value = "songs",key = "'genre_' + #genre.toLowerCase()")
     public List<Song> getSongsByGenre(String genre) {
         return songRepository.findByGenreIgnoreCase(genre);
     }
@@ -82,7 +83,7 @@ public class SongService implements Subject {
 //    public List<Song> searchSongsByTitle(String title) {
 //        return songRepository.findByTitleContainingIgnoreCase(title);
 //    }
-    @CachePut(value = "song_cache",key = "#id")
+    @CachePut(value = "songs",key = "#id")
     public Optional<Song> updateSong(UUID id, Song updatedSong) {
         return songRepository.findById(id).map(existingSong -> {
             existingSong.setTitle(updatedSong.getTitle());
@@ -93,14 +94,14 @@ public class SongService implements Subject {
         });
     }
 
-    @CacheEvict(value = "song_cache", key = "#id")
+    @CacheEvict(value = "songs", key = "#id")
     public boolean deleteSong(UUID id) {
         if (songRepository.existsById(id)) {
             songRepository.deleteById(id);
             playlistService.deleteSongFromAllPlaylists(id);
 
             //notify streaming service that song is deleted
-            musicProducer.sendSongDeleted(id);
+            //musicProducer.sendSongDeleted(id);
             //notify observers
             notifyObservers(id);
 
@@ -148,7 +149,10 @@ public class SongService implements Subject {
 
     @RabbitListener(queues = RabbitMQConfig.USER_DELETED_QUEUE)
     public boolean  deleteSongsByArtist(UUID artistId) {
-        List<Song> songs = songRepository.findByArtistId(artistId);
+
+//        List<Song> songs = songRepository.findByArtistId(artistId);
+        UUID hardcodedArtistID = UUID.fromString("b35a6f2c-972c-4dd3-876c-45a3a5ce0d1f");
+        List<Song> songs = songRepository.findByArtistId(hardcodedArtistID);
         if (!songs.isEmpty()) {
             songRepository.deleteAll(songs);
             // Notify observers for each deleted song
@@ -166,21 +170,21 @@ public class SongService implements Subject {
 
 
     //observer
-    @Override
-    public void registerObserver(Observer o){
-        observers.add(o);
-    }
-
-    @Override
-    public void removeObserver(Observer o){
-        observers.remove(o);
-    }
+//    @Override
+//    public void registerObserver(Observer o){
+//        observers.add(o);
+//    }
+//
+//    @Override
+//    public void removeObserver(Observer o){
+//        observers.remove(o);
+//    }
 
     @Override
     public void notifyObservers(UUID songId) {
-        for (Observer observer : observers) {
-            observer.onSongDeleted(songId);
-        }
+        //for (Observer observer : observers) {
+        songObserver.onSongDeleted(songId);
+        //}
     }
 
 
