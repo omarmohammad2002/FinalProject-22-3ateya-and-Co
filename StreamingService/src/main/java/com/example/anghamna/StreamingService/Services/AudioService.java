@@ -1,12 +1,13 @@
 package com.example.anghamna.StreamingService.Services;
 
+import com.example.anghamna.StreamingService.Clients.UserClient;
 import com.example.anghamna.StreamingService.Commands.AudioStreamingCommand;
 import com.example.anghamna.StreamingService.Commands.CommandInvoker;
 import com.example.anghamna.StreamingService.Models.Audio;
-import com.example.anghamna.StreamingService.Models.SongAddedEvent;
 import com.example.anghamna.StreamingService.Repositories.AudioRepository;
 import com.example.anghamna.StreamingService.rabbitmq.RabbitMQConfig;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.core.io.InputStreamResource;
@@ -25,6 +26,9 @@ public class AudioService {
     private final AudioRepository audioRepository;
     private final CommandInvoker streamingCommandInvoker;
     private final AudioLookupService audioLookupService;
+
+    @Autowired
+    private UserClient userClient;
 
     @Value("${media.storage.path}")
     private String storagePath;
@@ -72,7 +76,9 @@ public class AudioService {
         return audioRepository.findAll();
     }
 
-    public ResponseEntity<InputStreamResource> streamAudioController(UUID songId, String rangeHeader, String userType) throws Exception {
+    public ResponseEntity<InputStreamResource> streamAudioController(UUID songId, String rangeHeader, long userID) throws Exception {
+//        String userType = userClient.getUserTypeById(userID);
+        String userType = "premium" ;
         AudioStreamingCommand command = streamingCommandInvoker.getCommand(userType);
         return command.execute(songId, rangeHeader);
     }
