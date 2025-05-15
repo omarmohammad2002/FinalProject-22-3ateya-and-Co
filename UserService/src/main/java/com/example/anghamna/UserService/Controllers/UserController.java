@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/userapi/user")
 public class UserController {
@@ -40,7 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getUser(@PathVariable int id) {
+    public ResponseEntity<?> getUser(@PathVariable UUID id) {
         try{
             User user = userService.getUserById(id);
             if (user != null) {
@@ -70,7 +72,7 @@ public class UserController {
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<?> updateUser(@PathVariable int id, @RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<?> updateUser(@PathVariable UUID id, @RequestBody RegisterRequest registerRequest) {
         try {
             User updatedUser = userService.updateUser(id, registerRequest);
             return ResponseEntity.ok(updatedUser);
@@ -80,7 +82,7 @@ public class UserController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteUser(@PathVariable int id) {
+    public ResponseEntity<?> deleteUser(@PathVariable UUID id) {
         try {
             userService.deleteUser(id);
             return ResponseEntity.ok("User deleted successfully.");

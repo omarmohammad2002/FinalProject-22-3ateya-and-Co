@@ -6,19 +6,19 @@ import java.util.Objects;
 
 public class FollowId implements Serializable {
 
-    private int followerId;
-    private int followedId;
+    private UUID followerId;
+    private UUID followedId;
 
-    public int getFollowerId() {
+    public UUID getFollowerId() {
         return followerId;
     }
-    public void setFollowerId(int followerId) {
+    public void setFollowerId(UUID followerId) {
         this.followerId = followerId;
     }
-    public int getFollowedId() {
+    public UUID getFollowedId() {
         return followedId;
     }
-    public void setFollowedId(int followedId) {
+    public void setFollowedId(UUID followedId) {
         this.followedId = followedId;
     }
 

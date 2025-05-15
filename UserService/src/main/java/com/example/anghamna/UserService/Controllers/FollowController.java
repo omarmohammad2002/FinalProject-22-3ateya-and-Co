@@ -19,7 +19,7 @@ public class FollowController {
     }
 
     @PostMapping("/follow")
-    public ResponseEntity<?> follow(@RequestParam int followerId, @RequestParam int followedId) {
+    public ResponseEntity<?> follow(@RequestParam UUID followerId, @RequestParam UUID followedId) {
 
         if (followService.follow(followerId, followedId)) {
             return ResponseEntity.ok("Followed successfully");
@@ -29,7 +29,7 @@ public class FollowController {
     }
 
     @PostMapping("/unfollow")
-    public ResponseEntity<?> unfollow(@RequestParam int followerId, @RequestParam int followedId) {
+    public ResponseEntity<?> unfollow(@RequestParam UUID followerId, @RequestParam UUID followedId) {
         if (followService.unfollow(followerId, followedId)) {
             return ResponseEntity.ok("Unfollowed successfully");
         } else {
@@ -38,17 +38,17 @@ public class FollowController {
     }
 
     @GetMapping("/{userId}/followers")
-    public ResponseEntity<List<User>> getFollowers(@PathVariable int userId) {
+    public ResponseEntity<List<User>> getFollowers(@PathVariable UUID userId) {
         return ResponseEntity.ok(followService.getFollowers(userId));
     }
 
     @GetMapping("/{userId}/following")
-    public ResponseEntity<List<User>> getFollowing(@PathVariable int userId) {
+    public ResponseEntity<List<User>> getFollowing(@PathVariable UUID userId) {
         return ResponseEntity.ok(followService.getFollowing(userId));
     }
     @GetMapping("/{userId}/following/ids")
-    public ResponseEntity<List<Integer>> getFollowingIds(@PathVariable int userId) {
-        List<Integer> followingIds = followService.getFollowingIds(userId);
+    public ResponseEntity<List<UUID>> getFollowingIds(@PathVariable UUID userId) {
+        List<UUID> followingIds = followService.getFollowingIds(userId);
         return ResponseEntity.ok(followingIds);
     }
 
