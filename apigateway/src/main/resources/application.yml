@@ -11,12 +11,18 @@ spring:
         - id: user-service
           uri: http://localhost:8081
           predicates:
-            - Path=/user/**
-         
-        - id: music-service
+            - Path=/userapi/**
+
+        - id: music-service-songs
           uri: http://localhost:8082
           predicates:
-            - Path=/music/**
+            - Path=/songs/**
+
+        - id: music-service-playlists
+          uri: http://localhost:8082
+          predicates:
+            - Path=/playlists/**
+
         - id: socialmedia-service
           uri: http://localhost:8083
           predicates:

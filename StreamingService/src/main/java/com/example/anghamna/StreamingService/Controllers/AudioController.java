@@ -49,9 +49,12 @@ public class AudioController {
     @GetMapping("/stream/{songId}")
     public ResponseEntity<InputStreamResource> streamAudio(
             @PathVariable UUID songId,
-            @RequestParam("userType") String userType,
-            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader) throws Exception {
-        return audioService.streamAudioController(songId, rangeHeader, userType);
-    }    
+            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader,
+            @CookieValue("USER_ID") String userIdCookie) throws Exception {
+
+        UUID userID = UUID.fromString(userIdCookie);
+        return audioService.streamAudioController(songId, rangeHeader, userID);
+    }
+
 
 }
