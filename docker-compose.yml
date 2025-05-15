@@ -82,7 +82,7 @@ services:
     restart: always
 
   # User Service
-  user-app:
+  user-service:
     build:
       context: ./UserService
       dockerfile: Dockerfile
