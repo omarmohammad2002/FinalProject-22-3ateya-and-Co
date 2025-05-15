@@ -4,12 +4,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Document(collection = "posts")
 public class Post {
     @Id
     private String id;
-    private String userId;
+    private UUID userId;
     private String content;
     private Date timestamp;
     private int likesCount;
@@ -28,11 +29,11 @@ public class Post {
 
     // Builder
     public static class Builder {
-        private String userId;
+        private UUID userId;
         private String content;
         private String visibility = "public";
 
-        public Builder userId(String userId) {
+        public Builder userId(UUID userId) {
             this.userId = userId;
             return this;
         }
@@ -57,7 +58,7 @@ public class Post {
 
     // --- getters & setters ---
     public String getId() { return id; }
-    public String getUserId() { return userId; }
+    public UUID getUserId() { return userId; }
     public String getContent() { return content; }
     public Date getTimestamp() { return timestamp; }
     public int getLikesCount() { return likesCount; }
