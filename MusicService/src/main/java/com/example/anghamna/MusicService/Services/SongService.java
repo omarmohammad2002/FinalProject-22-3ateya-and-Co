@@ -149,7 +149,10 @@ public class SongService implements Subject {
 
     @RabbitListener(queues = RabbitMQConfig.USER_DELETED_QUEUE)
     public boolean  deleteSongsByArtist(UUID artistId) {
-        List<Song> songs = songRepository.findByArtistId(artistId);
+
+//        List<Song> songs = songRepository.findByArtistId(artistId);
+        UUID hardcodedArtistID = UUID.fromString("b35a6f2c-972c-4dd3-876c-45a3a5ce0d1f");
+        List<Song> songs = songRepository.findByArtistId(hardcodedArtistID);
         if (!songs.isEmpty()) {
             songRepository.deleteAll(songs);
             // Notify observers for each deleted song

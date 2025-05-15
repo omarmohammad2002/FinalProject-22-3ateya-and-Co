@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class EventPublisher {
@@ -33,8 +34,14 @@ public class EventPublisher {
 //    }
 
     public void publishUserDeletedEvent(int userId){
+     //FIXME change userID type from int to UUID
+
+        UUID hardcodedArtistID = UUID.fromString("b35a6f2c-972c-4dd3-876c-45a3a5ce0d1f");
+        String message = hardcodedArtistID.toString();
         rabbitTemplate.convertAndSend(RabbitMQConfig.MUSIC_EVENT_EXCHANGE,
                 RabbitMQConfig.USER_DELETED_ROUTING_KEY,
-                Map.of("userId", userId));
+                message
+        );
+
     }
 }

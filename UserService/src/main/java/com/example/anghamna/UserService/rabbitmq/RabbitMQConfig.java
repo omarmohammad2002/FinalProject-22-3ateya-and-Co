@@ -45,6 +45,17 @@ public class RabbitMQConfig {
 
 
 
+    @Bean
+    public Queue musicUserDeletedQueue() { return new Queue(MUSIC_USER_DELETED_QUEUE); }
+
+    @Bean
+    public Binding deleteUserBinding(Queue musicUserDeletedQueue, TopicExchange musicEventsExchange) {
+        return BindingBuilder
+                .bind(musicUserDeletedQueue)
+                .to(musicEventsExchange)
+                .with(USER_DELETED_ROUTING_KEY);
+    }
+
 
 
 
