@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class LikeService {
@@ -22,12 +23,12 @@ public class LikeService {
     private PostRepository postRepository;
 
     @Cacheable(value = "likeStatus", key = "#postId + '_' + #userId")
-    public boolean isPostLikedByUser(String postId, String userId) {
+    public boolean isPostLikedByUser(String postId, UUID userId) {
         return likeRepository.findByPostIdAndUserId(postId, userId).isPresent();
     }
 
     @CacheEvict(value = "likeStatus", key = "#postId + '_' + #userId")
-    public void likePost(String postId, String userId) {
+    public void likePost(String postId, UUID userId) {
         likeRepository.findByPostIdAndUserId(postId, userId).ifPresentOrElse(
                 like -> {},
                 () -> {
@@ -41,7 +42,7 @@ public class LikeService {
     }
 
     @CacheEvict(value = "likeStatus", key = "#postId + '_' + #userId")
-    public void unlikePost(String postId, String userId) {
+    public void unlikePost(String postId, UUID userId) {
         likeRepository.findByPostIdAndUserId(postId, userId).ifPresent(like -> {
             likeRepository.delete(like);
             postRepository.findById(postId).ifPresent(post -> {
@@ -62,10 +63,10 @@ public class LikeService {
 
     public class DynamicLikeCommand implements LikeCommand {
         private final String postId;
-        private final String userId;
+        private final UUID userId;
         private final String action; // "like" or "unlike"
 
-        public DynamicLikeCommand(String action, String postId, String userId) {
+        public DynamicLikeCommand(String action, String postId, UUID userId) {
             this.action = action;
             this.postId = postId;
             this.userId = userId;

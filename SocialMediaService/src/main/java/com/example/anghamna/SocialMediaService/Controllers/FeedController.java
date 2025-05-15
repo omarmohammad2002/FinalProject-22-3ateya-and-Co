@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/feeds")
@@ -19,7 +20,8 @@ public class FeedController {
     private PostService postService;  // This contains your getNewsFeedForUser method
 
     @GetMapping("/{userId}")
-    public List<Post> getNewsFeed(@PathVariable String userId) {
+    public List<Post> getNewsFeed(@CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
         return postService.getNewsFeedForUser(userId);
     }
     @Autowired
