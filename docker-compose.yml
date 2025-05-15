@@ -81,25 +81,25 @@ services:
       - mongo
     restart: always
 
-  # User Service
-  user-app:
-    build:
-      context: ./UserService
-      dockerfile: Dockerfile
-    container_name: userApp
-    ports:
-      - "8080:8080"
-    depends_on:
-      - postgres_users
-      - redis_cache
-      - rabbitmq
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_users:5432/users
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: 1234
-      SPRING_DATA_REDIS_HOST: redis_cache
-      SPRING_DATA_REDIS_PORT: 6379
-    restart: always
+#  # User Service
+#  user-app:
+#    build:
+#      context: ./UserService
+#      dockerfile: Dockerfile
+#    container_name: userApp
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - postgres_users
+#      - redis_cache
+#      - rabbitmq
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_users:5432/users
+#      SPRING_DATASOURCE_USERNAME: postgres
+#      SPRING_DATASOURCE_PASSWORD: 1234
+#      SPRING_DATA_REDIS_HOST: redis_cache
+#      SPRING_DATA_REDIS_PORT: 6379
+#    restart: always
 
   # Music Service
   music-service:
