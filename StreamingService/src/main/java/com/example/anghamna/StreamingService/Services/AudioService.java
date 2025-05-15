@@ -34,11 +34,6 @@ public class AudioService {
         this.streamingCommandInvoker = streamingCommandInvoker;
         this.audioLookupService = audioLookupService;
     }
-    @RabbitListener(queues = RabbitMQConfig.SONG_ADDED_QUEUE)
-    public void handleSongAdded(SongAddedEvent event) throws IOException {
-        System.out.println("Received new song: " + event.getSongId());
-        uploadAudio(event.getSongId(), event.getFile());
-    }
 
     @RabbitListener(queues = RabbitMQConfig.SONG_DELETED_QUEUE)
     public void handleSongDeleted(String message) throws IOException {
@@ -82,7 +77,7 @@ public class AudioService {
         return command.execute(songId, rangeHeader);
     }
 
-//    @CacheEvict(value="audio", key = "#songId")
+    @CacheEvict(value="audio", key = "#songId")
     public String deleteAudio(UUID songId) throws IOException {
         Audio audio = audioLookupService.getAudioIdBySongId(songId) ;
         File file = audioLookupService.getAudioFile(audio) ;

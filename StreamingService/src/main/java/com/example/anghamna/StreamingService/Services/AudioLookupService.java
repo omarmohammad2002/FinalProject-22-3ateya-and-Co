@@ -18,11 +18,12 @@ public class AudioLookupService {
         this.audioRepository = audioRepository;
     }
 
-//    @Cacheable(value = "audio", key = "#songId")
+    @Cacheable(value = "audio", key = "#songId")
     public Audio getAudioIdBySongId(UUID songId) throws FileNotFoundException {
         return audioRepository.findBySongId(songId)
                 .orElseThrow(() -> new FileNotFoundException("Audio not found for songId: " + songId));
     }
+
     public File getAudioFile(Audio audio) throws IOException {
         File audioFile = new File(audio.getFilePath());
         if (!audioFile.exists()) {
