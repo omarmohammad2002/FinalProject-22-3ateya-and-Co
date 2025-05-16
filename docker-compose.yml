@@ -138,3 +138,21 @@ services:
       - spring.data.mongodb.uri=mongodb://root:example@mongo:27017/3ateya_and_Co?authSource=admin
       - spring.data.mongodb.database=3ateya_and_Co
     restart: always
+
+    # Streaming Service
+  scoialmedia-service:
+    build:
+      context: ./SocialMediaService
+      dockerfile: Dockerfile
+    container_name: socialmedia-service-app
+    ports:
+      - "8083:8080"
+    depends_on:
+      - mongo
+      - redis_cache
+      - rabbitmq
+    environment:
+      - spring.data.mongodb.uri=mongodb://root:example@mongo:27017/socialmedia?authSource=admin
+      - spring.data.mongodb.database=socialmedia
+    restart: always
+

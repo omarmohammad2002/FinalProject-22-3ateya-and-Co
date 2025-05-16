@@ -5,11 +5,11 @@ import com.example.anghamna.SocialMediaService.Models.Post;
 import com.example.anghamna.SocialMediaService.Repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -33,34 +33,50 @@ public class PostService {
     }
 
     /** Get news feed for a user (cached by userId) */
-    @Cacheable(value = "newsFeed", key = "#userId")
+    //@Cacheable(value = "newsFeed", key = "#userId")
     public List<Post> getNewsFeedForUser(UUID userId) {
-        List<String> followings = userClient.getFollowings(userId);
+        List<UUID> followings = userClient.getFollowings(userId);
         return postRepository.findByUserIdIn(followings);
     }
 
-    /** Get all public posts (cached globally) */
-
+    /** Get all public posts */
     public List<Post> getAllPublicPosts() {
         System.out.println("service");
         return postRepository.findByVisibility("public");
     }
 
-    /** Get posts by a user (cached by userId) */
-
+    /** Get posts by a specific user */
     public List<Post> getPostsByUser(UUID userId) {
         return postRepository.findByUserId(userId);
     }
 
-    /** Update a post (Evict affected user's cache and public posts) */
+    /** Update a post only if the user owns it */
     @CacheEvict(value = {"publicPosts", "userPosts", "newsFeed"}, allEntries = true)
-    public Post updatePost(Post updated) {
-        return postRepository.save(updated);
+    public Post updatePost(String postId, UUID userId, String content, String visibility) {
+        Optional<Post> optionalPost = postRepository.findById(postId)
+                .filter(post -> post.getUserId().equals(userId));
+
+        if (optionalPost.isEmpty()) {
+            throw new IllegalStateException("User does not own this post or post does not exist.");
+        }
+
+        Post post = optionalPost.get();
+        post.setContent(content);
+        post.setVisibility(visibility);
+
+        return postRepository.save(post);
     }
 
-    /** Delete a post and evict all related caches */
+    /** Delete a post only if the user owns it */
     @CacheEvict(value = {"publicPosts", "userPosts", "newsFeed"}, allEntries = true)
-    public void deletePost(String postId) {
+    public void deletePost(String postId, UUID userId) {
+        Optional<Post> optionalPost = postRepository.findById(postId)
+                .filter(post -> post.getUserId().equals(userId));
+
+        if (optionalPost.isEmpty()) {
+            throw new IllegalStateException("User does not own this post or post does not exist.");
+        }
+
         postRepository.deleteById(postId);
     }
 }

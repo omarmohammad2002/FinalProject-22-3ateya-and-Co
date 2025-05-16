@@ -66,4 +66,12 @@ public class Post {
     public int getCommentsCount() { return commentsCount; }
     public void setCommentsCount(int commentsCount) { this.commentsCount = commentsCount; }
     public String getVisibility() { return visibility; }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
 }

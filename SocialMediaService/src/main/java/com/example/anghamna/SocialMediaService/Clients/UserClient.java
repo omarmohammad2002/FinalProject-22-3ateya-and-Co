@@ -9,5 +9,5 @@ import java.util.UUID;
 public interface UserClient {
 
     @GetMapping("/followings/{userId}")
-    List<String> getFollowings(@PathVariable UUID userId);
+    List<UUID> getFollowings(@PathVariable UUID userId);
 }

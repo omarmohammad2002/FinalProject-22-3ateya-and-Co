@@ -15,24 +15,24 @@ import java.util.UUID;
 @RequestMapping("/feeds")
 public class FeedController {
 
-    private FeedService feedService;
+    //private FeedService feedService;
     @Autowired
     private PostService postService;  // This contains your getNewsFeedForUser method
 
-    @GetMapping("/{userId}")
+    @GetMapping
     public List<Post> getNewsFeed(@CookieValue("USER_ID") String userIdCookie) {
         UUID userId = UUID.fromString(userIdCookie);
         return postService.getNewsFeedForUser(userId);
     }
-    @Autowired
-    public FeedController(FeedService feedService) {
-        this.feedService = feedService;
-    }
-
-    @PostMapping
-    public Feed createFeed(@RequestBody Feed feed) {
-        return feedService.createFeed(feed);
-    }
+    //   @Autowired
+//    public FeedController(FeedService feedService) {
+//        this.feedService = feedService;
+//    }
+//
+//    @PostMapping
+//    public Feed createFeed(@RequestBody Feed feed) {
+//        return feedService.createFeed(feed);
+//    }
 
 //    @GetMapping("/{userId}")
 //    public List<Feed> getFeedForUser(@PathVariable String userId) {
