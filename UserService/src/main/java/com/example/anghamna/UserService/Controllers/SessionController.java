@@ -24,32 +24,54 @@ public class SessionController {
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest, HttpServletResponse response) {
         try {
             Session session = sessionService.login(loginRequest.getUsername(), loginRequest.getPassword());
-            System.out.println(session);
-            Cookie cookie = new Cookie("SESSION_ID", session.getId() + "");
-            cookie.setHttpOnly(true);
-            cookie.setPath("/"); // available to all endpoints
-            cookie.setMaxAge(2 * 60 * 60); // 2 hours
-            response.addCookie(cookie);
+
+            // Create SESSION_ID cookie
+            Cookie sessionCookie = new Cookie("SESSION_ID", session.getId() + "");
+            sessionCookie.setHttpOnly(true); // can't be accessed via JS
+            sessionCookie.setPath("/");
+            sessionCookie.setMaxAge(2 * 60 * 60); // 2 hours
+            response.addCookie(sessionCookie);
+
+            // Create USER_ID cookie
+            Cookie userIdCookie = new Cookie("USER_ID", session.getUser().getId().toString());
+            userIdCookie.setHttpOnly(false); // optional: allow JS access if needed
+            userIdCookie.setPath("/");
+            userIdCookie.setMaxAge(2 * 60 * 60);
+            response.addCookie(userIdCookie);
 
             return ResponseEntity.ok("Logged in successfully");
-        }catch (Exception e) {
-            e.printStackTrace(); // Add this
+        } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
         }
-
-
     }
+
 
     @DeleteMapping("/logout/{sessionId}")
-    public String logout(@PathVariable int sessionId) {
+    public ResponseEntity<String> logout(@PathVariable int sessionId, HttpServletResponse response) {
         sessionService.logout(sessionId);
-        return "Logged out successfully.";
+
+        // Delete SESSION_ID cookie
+        Cookie sessionCookie = new Cookie("SESSION_ID", null);
+        sessionCookie.setHttpOnly(true);
+        sessionCookie.setPath("/");
+        sessionCookie.setMaxAge(0); // Delete immediately
+        response.addCookie(sessionCookie);
+
+        // Delete USER_ID cookie
+        Cookie userIdCookie = new Cookie("USER_ID", null);
+        userIdCookie.setPath("/");
+        userIdCookie.setMaxAge(0); // Delete immediately
+        response.addCookie(userIdCookie);
+
+        return ResponseEntity.ok("Logged out successfully.");
     }
+
 
     @GetMapping("/validate")
     public ResponseEntity<?> validateSession(@RequestHeader("X-Session-ID") int sessionId) {
         try {
-            int userId = sessionService.validateSession(sessionId);
+            UUID userId = sessionService.validateSession(sessionId);
             return ResponseEntity.ok(userId);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());

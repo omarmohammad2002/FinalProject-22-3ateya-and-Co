@@ -33,7 +33,7 @@ public class EventPublisher {
 //                Map.of("followerId", followerId, "unfollowedId", followedId));
 //    }
 
-    public void publishUserDeletedEvent(int userId){
+    public void publishUserDeletedEvent(UUID userId){
      //FIXME change userID type from int to UUID
 
         UUID hardcodedArtistID = UUID.fromString("b35a6f2c-972c-4dd3-876c-45a3a5ce0d1f");
