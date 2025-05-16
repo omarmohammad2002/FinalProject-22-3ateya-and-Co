@@ -14,23 +14,42 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
-@Service
 public class SessionService {
-    @Autowired
-    private SessionRepository sessionRepository;
 
-    @Autowired
-    private UserService userService;
+    private static SessionService instance;
 
+    private final SessionRepository sessionRepository;
+    private final UserService userService;
 
+    // 🔒 Private constructor to prevent external instantiation
+    private SessionService(SessionRepository sessionRepository, UserService userService) {
+        this.sessionRepository = sessionRepository;
+        this.userService = userService;
+    }
+
+    // 🚪 Public method to access the single instance
+    public static SessionService getInstance(SessionRepository sessionRepository, UserService userService) {
+        if (instance == null) {
+            synchronized (SessionService.class) {
+                if (instance == null) {
+                    instance = new SessionService(sessionRepository, userService);
+                    System.out.println("SessionService instance created");
+                }
+            }
+        }
+        return instance;
+    }
+
+    // ✅ Original methods (login, logout, validateSession) remain the same
     public Session login(String username, String password) {
         User user = userService.getUserByUsername(username);
         if (!BCrypt.checkpw(password, user.getPassword_hash())) {
             throw new RuntimeException("Invalid username or password");
         }
+
         Session existingSession = sessionRepository.findFirstByUserAndExpiredAtAfter(user, Date.from(Instant.now()));
         if (existingSession != null) {
-            throw new RuntimeException("You are already logged in. Please log out or wait for session to expire.");
+            throw new RuntimeException("You are already logged in.");
         }
 
         Session session = new Session();
@@ -55,6 +74,6 @@ public class SessionService {
             throw new RuntimeException("Invalid or expired session.");
         }
 
-        return sessionOptional.get().getUser().getId(); // return the user ID
+        return sessionOptional.get().getUser().getId();
     }
 }
