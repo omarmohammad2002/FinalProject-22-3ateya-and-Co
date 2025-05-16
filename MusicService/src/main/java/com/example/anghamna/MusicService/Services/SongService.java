@@ -163,11 +163,10 @@ public class SongService implements Subject {
 
     }
 
-    @Transactional
+    @CacheEvict(value = "songs", key = "#artistId")
     @RabbitListener(queues = RabbitMQConfig.MUSIC_USER_DELETED_QUEUE)
-    public void  deleteSongsByArtist(String message) {
-
-        UUID artistId = UUID.fromString(message);
+    @Transactional
+    public void  deleteSongsByArtist(UUID artistId) {
         Set<Song> songs = songRepository.findByArtistId(artistId);
 
             if (!songs.isEmpty()) {
@@ -179,6 +178,9 @@ public class SongService implements Subject {
                     Set<Playlist> playlists = song.getPlaylists();
                     for (Playlist playlist : playlists) {
                         playlistService.deleteSongFromAllPlaylists(song.getId());
+                        if(playlist.getOwnerId().equals(artistId)){
+                            playlistService.deletePlaylist(playlist.getId(), artistId);
+                        }
 
                     }
                     // Save all updated playlists
@@ -187,7 +189,6 @@ public class SongService implements Subject {
                     // Now delete song safely
                     songRepository.delete(song);
 
-                    logger.info("🎧 Song  deleted received for songId: {}", song.getId());
                     // Notify
                     notifyObservers(song.getId());
                 }

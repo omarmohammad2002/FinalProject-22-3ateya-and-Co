@@ -14,7 +14,9 @@ import java.util.UUID;
 public interface SongRepository extends JpaRepository<Song, UUID> {
 
 
-    Set<Song> findByArtistId(UUID artistId);
+//    Set<Song> findByArtistId(UUID artistId);
+    @Query("SELECT s FROM Song s LEFT JOIN FETCH s.playlists WHERE s.artistId = :artistId")
+    Set<Song> findByArtistId(@Param("artistId") UUID artistId);
 
     Set<Song> findByGenreIgnoreCase(String genre);
 
