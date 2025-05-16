@@ -54,9 +54,8 @@ public class Song {
     // Constructors
     public Song() {}
 
-    public Song(String title, UUID artistId, String genre, int duration) {
+    public Song(String title, String genre, int duration) {
         this.title = title;
-        this.artistId = artistId;
         this.genre = genre;
         this.duration = duration;
         this.likeCount = 0;

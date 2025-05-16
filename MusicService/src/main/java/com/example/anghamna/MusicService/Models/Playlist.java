@@ -57,9 +57,8 @@ public class Playlist {
         this.all_songs = new HashSet<>();
     }
 
-    public Playlist(String name, UUID ownerId, boolean isPrivate, Song song) {
+    public Playlist(String name, boolean isPrivate, Song song) {
         this.name = name;
-        this.ownerId = ownerId;
         this.isPrivate = isPrivate;
         this.createdAt = Date.from(Instant.now());
 //        this.songs = new ArrayList<Song>();
