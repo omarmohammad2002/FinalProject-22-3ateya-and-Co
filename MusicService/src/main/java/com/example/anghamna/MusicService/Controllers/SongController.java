@@ -1,7 +1,9 @@
 package com.example.anghamna.MusicService.Controllers;
 
 
+import com.example.anghamna.MusicService.Models.Playlist;
 import com.example.anghamna.MusicService.Models.Song;
+import com.example.anghamna.MusicService.Services.PlaylistService;
 import com.example.anghamna.MusicService.Services.SongService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -18,6 +21,8 @@ public class SongController {
 
     @Autowired
     private final SongService songService;
+
+
 
     public SongController(SongService songService) {
         this.songService = songService;
@@ -33,7 +38,7 @@ public class SongController {
 
     // Get all songs
     @GetMapping("/")
-    public ResponseEntity<List<Song>> getAllSongs() {
+    public ResponseEntity<Set<Song>> getAllSongs() {
         return ResponseEntity.ok(songService.getAllSongs());
     }
 
@@ -47,14 +52,20 @@ public class SongController {
 
     // Get songs by artist
     @GetMapping("/artist/{artistId}")
-    public ResponseEntity<List<Song>> getSongsByArtist(@PathVariable UUID artistId) {
+    public ResponseEntity<Set<Song>> getSongsByArtist(@PathVariable UUID artistId) {
         return ResponseEntity.ok(songService.getSongsByArtist(artistId));
     }
 
     // Get songs by genre
     @GetMapping("/genre/{genre}")
-    public ResponseEntity<List<Song>> getSongsByGenre(@PathVariable String genre) {
+    public ResponseEntity<Set<Song>> getSongsByGenre(@PathVariable String genre) {
         return ResponseEntity.ok(songService.getSongsByGenre(genre));
+    }
+
+
+    @GetMapping("/getPlaylists/{songId}")
+    public Set<Playlist> getPlaylistsBySongId(@PathVariable UUID songId) {
+        return songService.getSongById(songId).get().getPlaylists();
     }
 
 //    // Search songs by title (partial match)
@@ -97,15 +108,9 @@ public class SongController {
         }
     }
 
-    //TODO update song stream count
-
    @PutMapping("/{id}/stream")
-   public ResponseEntity<Void> updateSongStreamCount(@PathVariable UUID id) {
-       if (songService.streamedSong(id)) {
-           return ResponseEntity.ok().build();
-       } else {
-           return ResponseEntity.notFound().build();
-       }
+   public void updateSongStreamCount(@PathVariable String id) {
+       songService.streamedSong(id);
    }
 
 //

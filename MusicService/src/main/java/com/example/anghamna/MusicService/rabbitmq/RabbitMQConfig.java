@@ -15,23 +15,23 @@ import org.springframework.amqp.core.Queue;
 public class RabbitMQConfig {
 
     //exchanges
-    public static final String EXCHANGE = "song_exchange";
-    public static final String USER_EXCHANGE = "user_exchange";
+    public static final String EXCHANGE = "music_exchange";
+    public static final String USER_EXCHANGE = "music.events";
 
     //song liked
 //    public static final String SONG_LIKED_QUEUE = "song_liked_queue";
 //    public static final String SONG_LIKED_ROUTING_KEY = "song_liked_routing";
 
     //song streamed
-    public static final String SONG_STREAMED_QUEUE = "song_streamed_queue";
-    public static final String SONG_STREAMED_ROUTING_KEY = "song_streamed_routing";
+    public static final String SONG_STREAMED_QUEUE = "stream_played_queue";
+    public static final String SONG_STREAMED_ROUTING_KEY = "stream.played";
 
     //song deleted
     public static final String SONG_DELETED_QUEUE = "song_deleted_queue";
-    public static final String SONG_DELETED_ROUTING_KEY = "song_deleted_routing";
+    public static final String SONG_DELETED_ROUTING_KEY = "song.deleted";
 
     //user deleted
-    public static final String USER_DELETED_QUEUE = "user_deleted_queue";
+    public static final String USER_DELETED_QUEUE = "music.user_deleted";
     public static final String USER_DELETED_ROUTING_KEY = "user_deleted_routing";
 
 

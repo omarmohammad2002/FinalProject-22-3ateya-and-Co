@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -40,12 +41,10 @@ public class PlaylistController {
 
     //Create a playlist
     @PostMapping
-    public ResponseEntity<Playlist> createPlaylist(
-            @Valid @RequestBody Playlist request)
-          //  @RequestHeader("X-User-ID") Long userId)
+    public ResponseEntity<Playlist> createPlaylist(@RequestBody Playlist playlist)
     {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(playlistService.createPlaylist(request/*, userId*/));
+        Playlist created = playlistService.createPlaylist(playlist);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     // Get Playlist by ID
@@ -59,16 +58,22 @@ public class PlaylistController {
 
     // Get user playlists
 
-    @GetMapping("/")
-    public ResponseEntity<List<Playlist>> getUserPlaylists(@RequestParam("userId") UUID userId) {
+    @GetMapping("/user/{id}")
+    public ResponseEntity<Set<Playlist>> getUserPlaylists(@PathVariable("id") UUID userId) {
         return ResponseEntity.ok(playlistService.getPlaylistsByUserId(userId));
     }
 
 
     @GetMapping("/public")
-    public ResponseEntity<List<Playlist>> getPublicPlaylists() {
+    public ResponseEntity<Set<Playlist>> getPublicPlaylists() {
         return ResponseEntity.ok(playlistService.getPublicPlaylists());
     }
+
+    @GetMapping("/playlistSongs/{id}")
+    public ResponseEntity<Set<Song>> getPlaylistSongs(@PathVariable UUID id) {
+        return ResponseEntity.ok(playlistService.getPlaylistSongs(id));
+    }
+
 
 
 
@@ -90,7 +95,7 @@ public class PlaylistController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlaylist(
             @PathVariable UUID id,
-              @RequestHeader() UUID userId) { //FIXME is this how itll be passed
+              @RequestBody() UUID userId) { //FIXME is this how itll be passed
         {
             playlistService.deletePlaylist(id, userId);
             return ResponseEntity.noContent().build();
@@ -98,22 +103,21 @@ public class PlaylistController {
     }
 
     //FIXME check who owns it and only they can toggle privacy
-    @PatchMapping("/{id}/privacy")
-    public ResponseEntity<Void> togglePrivacy(
+    @PatchMapping("privacy/{id}/{userId}")
+    public void togglePrivacy(
             @PathVariable UUID id,
-            @RequestHeader() UUID userId) { //FIXME is this how itll be passed
+            @PathVariable() UUID userId) { //FIXME is this how itll be passed
         playlistService.togglePrivacy(id, userId);
-        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/{playlistId}/add")
-    public void addSong(@PathVariable UUID playlistId, @RequestParam UUID songId) {
+    public void addSong(@PathVariable UUID playlistId, @RequestBody() UUID songId) {
         AddSongCommand addCommand = new AddSongCommand(playlistRepository,songRepository, playlistId, songId);
         playlistService.addSong(addCommand);
     }
 
     @DeleteMapping("/{playlistId}/remove")
-    public void removeSong(@PathVariable UUID playlistId, @RequestParam UUID songId) {
+    public void removeSong(@PathVariable UUID playlistId, @RequestBody() UUID songId) {
         RemoveSongCommand removeCommand = new RemoveSongCommand(playlistRepository, songRepository, playlistId, songId);
         playlistService.removeSong(removeCommand);
     }

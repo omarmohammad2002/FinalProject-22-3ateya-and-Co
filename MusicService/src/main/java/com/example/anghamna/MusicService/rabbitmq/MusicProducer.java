@@ -13,10 +13,11 @@ public class MusicProducer {
     private RabbitTemplate rabbitTemplate;
 
     public void sendSongDeleted(UUID songId) {
+        String message = songId.toString();
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE,
                 RabbitMQConfig.SONG_DELETED_ROUTING_KEY,
-                songId
+                message
         );
         System.out.println("Sent song deleted: " + songId);
     }

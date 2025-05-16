@@ -2,13 +2,18 @@ package com.example.anghamna.MusicService.Services;
 
 
 //import com.example.anghamna.MusicService.Clients.UserClient;
+import com.example.anghamna.MusicService.Models.Playlist;
 import com.example.anghamna.MusicService.Models.Song;
 
 import com.example.anghamna.MusicService.Repositories.PlaylistRepository;
 import com.example.anghamna.MusicService.Repositories.SongRepository;
+import com.example.anghamna.MusicService.observers.SongObserver;
 import com.example.anghamna.MusicService.observers.Subject;
 import com.example.anghamna.MusicService.rabbitmq.MusicProducer;
 import com.example.anghamna.MusicService.rabbitmq.RabbitMQConfig;
+import jakarta.persistence.PreRemove;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -16,7 +21,9 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import com.example.anghamna.MusicService.observers.Observer;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -27,19 +34,20 @@ public class SongService implements Subject {
     private final SongRepository songRepository;
     @Autowired
     private final PlaylistService playlistService;
+    private static final Logger logger = LoggerFactory.getLogger(SongService.class);
 
     @Autowired
     private MusicProducer musicProducer;
     //observer
-    private List<Observer> observers;
+    private SongObserver songObserver;
     //feign client
 //    @Autowired
 //    private UserClient userClient;
 
-    public SongService(SongRepository songRepository, MusicProducer musicProducer, PlaylistService playlistService) {
+    public SongService(SongRepository songRepository, MusicProducer musicProducer, PlaylistService playlistService, SongObserver songObserver) {
         this.songRepository = songRepository;
         this.musicProducer = musicProducer;
-        this.observers = new ArrayList<>();
+        this.songObserver = songObserver;
         this.playlistService = playlistService;
         //this.userClient = userClient; //FIXME we need to fetch it from the request or cookie?
     }
@@ -54,22 +62,25 @@ public class SongService implements Subject {
         return songRepository.save(song);
     }
 
-    public List<Song> getAllSongs() {
-        return songRepository.findAll();
+    public Set<Song> getAllSongs() {
+        List<Song> songs = songRepository.findAll();
+        Set<Song> songs_set = new HashSet<>(songs);
+        return songs_set;
+
     }
 
-    @Cacheable(value = "song_cache",key = "#id")
+    @Cacheable(value = "songs",key = "#id")
     public Optional<Song> getSongById(UUID id) {
         return songRepository.findById(id);
     }
 
-    @Cacheable(value = "song_cache",key = "'artist_' + #artistId")
-    public List<Song> getSongsByArtist(UUID artistId) {
+    @Cacheable(value = "songs",key = "'artist_' + #artistId")
+    public Set<Song> getSongsByArtist(UUID artistId) {
         return songRepository.findByArtistId(artistId);
     }
 
-    @Cacheable(value = "song_cache",key = "'genre_' + #genre.toLowerCase()")
-    public List<Song> getSongsByGenre(String genre) {
+    @Cacheable(value = "songs",key = "'genre_' + #genre.toLowerCase()")
+    public Set<Song> getSongsByGenre(String genre) {
         return songRepository.findByGenreIgnoreCase(genre);
     }
 
@@ -78,7 +89,7 @@ public class SongService implements Subject {
 //    public List<Song> searchSongsByTitle(String title) {
 //        return songRepository.findByTitleContainingIgnoreCase(title);
 //    }
-    @CachePut(value = "song_cache",key = "#id")
+    @CachePut(value = "songs",key = "#id")
     public Optional<Song> updateSong(UUID id, Song updatedSong) {
         return songRepository.findById(id).map(existingSong -> {
             existingSong.setTitle(updatedSong.getTitle());
@@ -89,17 +100,27 @@ public class SongService implements Subject {
         });
     }
 
-    @CacheEvict(value = "song_cache", key = "#id")
+    @Transactional
+    @PreRemove
+    @CacheEvict(value = "songs", key = "#id")
     public boolean deleteSong(UUID id) {
-        if (songRepository.existsById(id)) {
-            songRepository.deleteById(id);
-            playlistService.deleteSongFromAllPlaylists(id);
+        Optional<Song> songOptional = songRepository.findById(id);
+        if (songOptional.isPresent()) {
+            Song song = songOptional.get();
 
-            //notify streaming service that song is deleted
-            musicProducer.sendSongDeleted(id);
-            //notify observers
+            // Detach song from all playlists (Hibernate-aware)
+            Set<Playlist> playlists = song.getPlaylists();
+            for (Playlist playlist : playlists) {
+                playlistService.deleteSongFromAllPlaylists(song.getId());
+            }
+            // Save all updated playlists
+            playlistService.saveAllPlaylists(playlists);
+
+            // Now delete song safely
+            songRepository.delete(song);
+
+            // Notify
             notifyObservers(id);
-
             return true;
         }
         return false;
@@ -132,50 +153,56 @@ public class SongService implements Subject {
 
     //rabbitmq
     @RabbitListener(queues = RabbitMQConfig.SONG_STREAMED_QUEUE)
-    public boolean streamedSong(UUID id) {
+    public void streamedSong(String message) {
+        UUID id = UUID.fromString(message);
         Song song = songRepository.findById(id).orElse(null);
-        if (song == null) return false ;
+        if (song == null) return  ;
         song.setStreamCount(song.getStreamCount() + 1);
-
+        logger.info("🎧 Stream event received for songId: {}", id);
         songRepository.save(song);
-        return true;
+
     }
 
     @RabbitListener(queues = RabbitMQConfig.USER_DELETED_QUEUE)
     public boolean  deleteSongsByArtist(UUID artistId) {
-        List<Song> songs = songRepository.findByArtistId(artistId);
+
+        Set<Song> songs = songRepository.findByArtistId(artistId);
+//        UUID hardcodedArtistID = UUID.fromString("b35a6f2c-972c-4dd3-876c-45a3a5ce0d1f");
+//        Set<Song> songs = songRepository.findByArtistId(hardcodedArtistID);
         if (!songs.isEmpty()) {
-            songRepository.deleteAll(songs);
+
+            //songRepository.deleteAll(songs);
             // Notify observers for each deleted song
             for (Song song : songs) {
                 //notify streaming service that song is deleted
-                musicProducer.sendSongDeleted(song.getId());
-                notifyObservers(song.getId());
+//                musicProducer.sendSongDeleted(song.getId());
+//                notifyObservers(song.getId());
+                this.deleteSong(song.getId());
             }
             return true;
 
         }
-        //TODO Add in observer + fix logic order to be before the return true
+
         return false;
     }
 
 
     //observer
-    @Override
-    public void registerObserver(Observer o){
-        observers.add(o);
-    }
-
-    @Override
-    public void removeObserver(Observer o){
-        observers.remove(o);
-    }
+//    @Override
+//    public void registerObserver(Observer o){
+//        observers.add(o);
+//    }
+//
+//    @Override
+//    public void removeObserver(Observer o){
+//        observers.remove(o);
+//    }
 
     @Override
     public void notifyObservers(UUID songId) {
-        for (Observer observer : observers) {
-            observer.onSongDeleted(songId);
-        }
+        //for (Observer observer : observers) {
+        songObserver.onSongDeleted(songId);
+        //}
     }
 
 

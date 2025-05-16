@@ -1,12 +1,14 @@
 package com.example.anghamna.MusicService.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "songs")
@@ -18,7 +20,7 @@ public class Song {
 
     private String title;
 
-    @Column(name = "artist_id", nullable = false)
+//    @Column(name = "artist_id", nullable = false)
     private UUID artistId;
 
     private String genre;
@@ -26,26 +28,28 @@ public class Song {
     private int duration; // in seconds
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+//    @Column(name = "created_at", updatable = false)
+    private Date createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+//    @Column(name = "updated_at")
+    private Date updatedAt;
 
     private int likeCount = 0;
 
     private int streamCount = 0;
 
-    @ManyToMany(mappedBy = "songs")
-    private List<Playlist> playlists;
+    @JsonBackReference
+    @JsonIgnore
+    @ManyToMany(mappedBy = "all_songs", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Playlist> playlists = new HashSet<>();
 
-    //FIXME revise with omar if we need it, we need to store the song url or have user?
-    private String songURL;
+
     // when they call upload song we call on both create song in both services?
     // or should this service send it to sttreaming and pass the strong id when we create it
 // we need to add the songURL field to the constructor and getters/setters
-
+    //Instant now = Instant.now();
+    //        created_at = Date.from(now);
     
     // Constructors
     public Song() {}
@@ -57,10 +61,11 @@ public class Song {
         this.duration = duration;
         this.likeCount = 0;
         this.streamCount = 0;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = Date.from(Instant.now());
+        this.updatedAt = Date.from(Instant.now());
 
     }
+
 
     public Song(String title, UUID artistId, String genre, int duration, int likeCount, int streamCount) {
         this.title = title;
@@ -69,12 +74,12 @@ public class Song {
         this.duration = duration;
         this.likeCount = likeCount;
         this.streamCount = streamCount;
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = LocalDateTime.now();
+        this.createdAt = Date.from(Instant.now());
+        this.updatedAt = Date.from(Instant.now());
 
     }
 
-    public Song(UUID id, String title, UUID artistId, String genre, int duration, LocalDateTime createdAt, int likeCount, int streamCount) {
+    public Song(UUID id, String title, UUID artistId, String genre, int duration, Date createdAt, int likeCount, int streamCount) {
         this.id = id;
         this.title = title;
         this.artistId = artistId;
@@ -129,11 +134,11 @@ public class Song {
         this.duration = duration;
     }
 
-    public LocalDateTime getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() {
+    public Date getUpdatedAt() {
         return updatedAt;
     }
 
@@ -153,4 +158,11 @@ public class Song {
         this.streamCount = streamCount;
     }
 
+    public Set<Playlist> getPlaylists() {
+        return playlists;
+    }
+
+    public void setPlaylists(Set<Playlist> playlists) {
+        this.playlists = playlists;
+    }
 }
