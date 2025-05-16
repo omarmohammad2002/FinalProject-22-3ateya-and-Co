@@ -10,12 +10,12 @@ import java.util.UUID;
 public class EventPublisher {
 
     @Autowired
-    private final RabbitTemplate rabbitTemplate;
+    private RabbitTemplate rabbitTemplate;
 
 
-    public EventPublisher(RabbitTemplate rabbitTemplate) {
-        this.rabbitTemplate = rabbitTemplate;
-    }
+//    public EventPublisher(RabbitTemplate rabbitTemplate) {
+//        this.rabbitTemplate = rabbitTemplate;
+//    }
 
     // Publish follow event
 //    public void publishFollowEvent(String followerId, String followedId) {
@@ -34,7 +34,8 @@ public class EventPublisher {
     public void publishUserDeletedEvent(UUID userId){
 
         String message = userId.toString();
-        rabbitTemplate.convertAndSend(RabbitMQConfig.MUSIC_EVENT_EXCHANGE,
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
                 RabbitMQConfig.USER_DELETED_ROUTING_KEY,
                 message
         );

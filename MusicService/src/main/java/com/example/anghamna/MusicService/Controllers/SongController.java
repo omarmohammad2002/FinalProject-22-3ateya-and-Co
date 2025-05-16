@@ -145,7 +145,7 @@ public class SongController {
     //Delete song by artist
 
     @DeleteMapping("/artist/{artistId}")
-    public void deleteSongsByArtist(@PathVariable UUID artistId) {
+    public void deleteSongsByArtist(@PathVariable String artistId) {
        songService.deleteSongsByArtist(artistId);
 //            return ResponseEntity.noContent().build();
 //        } else {

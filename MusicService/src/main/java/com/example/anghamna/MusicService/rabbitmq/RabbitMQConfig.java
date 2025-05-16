@@ -18,8 +18,11 @@ public class RabbitMQConfig {
     //streaming exchange
     public static final String EXCHANGE = "music_exchange";
 
-    //user exchange
-    public static final String MUSIC_EVENT_EXCHANGE = "music.events";
+    //user deleted exchange
+    //public static final String MUSIC_EVENT_EXCHANGE = "music.events";
+    public static final String MUSIC_USER_DELETED_QUEUE = "music.user_deleted";
+    public static final String USER_DELETED_ROUTING_KEY = "user.deleted";
+
 
     //song liked
 //    public static final String SONG_LIKED_QUEUE = "song_liked_queue";
@@ -33,9 +36,6 @@ public class RabbitMQConfig {
     public static final String SONG_DELETED_QUEUE = "song_deleted_queue";
     public static final String SONG_DELETED_ROUTING_KEY = "song.deleted";
 
-    //user deleted
-    public static final String MUSIC_USER_DELETED_QUEUE = "music.user_deleted";
-    public static final String USER_DELETED_ROUTING_KEY = "user.deleted";
 
 
     //exchange with streaming
@@ -45,10 +45,10 @@ public class RabbitMQConfig {
     }
 
     //user exchange
-    @Bean
-    public TopicExchange musicEventsExchange() {
-        return new TopicExchange(MUSIC_EVENT_EXCHANGE);
-    }
+//    @Bean
+//    public TopicExchange musicEventsExchange() {
+//        return new TopicExchange(MUSIC_EVENT_EXCHANGE);
+//    }
 
     //song liked queue and binding
 //    @Bean
@@ -98,10 +98,10 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public Binding userBinding(Queue musicUserDeletedQueue, TopicExchange musicEventsExchange) {
+    public Binding deleteUserBinding(Queue musicUserDeletedQueue, TopicExchange exchange) {
         return BindingBuilder
                 .bind(musicUserDeletedQueue)
-                .to(musicEventsExchange)
+                .to(exchange)
                 .with(USER_DELETED_ROUTING_KEY);
     }
 
