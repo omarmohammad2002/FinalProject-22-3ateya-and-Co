@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -58,18 +59,18 @@ public class PlaylistController {
     // Get user playlists
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<Playlist>> getUserPlaylists(@PathVariable("id") UUID userId) {
+    public ResponseEntity<Set<Playlist>> getUserPlaylists(@PathVariable("id") UUID userId) {
         return ResponseEntity.ok(playlistService.getPlaylistsByUserId(userId));
     }
 
 
     @GetMapping("/public")
-    public ResponseEntity<List<Playlist>> getPublicPlaylists() {
+    public ResponseEntity<Set<Playlist>> getPublicPlaylists() {
         return ResponseEntity.ok(playlistService.getPublicPlaylists());
     }
 
     @GetMapping("/playlistSongs/{id}")
-    public ResponseEntity<List<Song>> getPlaylistSongs(@PathVariable UUID id) {
+    public ResponseEntity<Set<Song>> getPlaylistSongs(@PathVariable UUID id) {
         return ResponseEntity.ok(playlistService.getPlaylistSongs(id));
     }
 
@@ -94,7 +95,7 @@ public class PlaylistController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlaylist(
             @PathVariable UUID id,
-              @RequestHeader() UUID userId) { //FIXME is this how itll be passed
+              @RequestBody() UUID userId) { //FIXME is this how itll be passed
         {
             playlistService.deletePlaylist(id, userId);
             return ResponseEntity.noContent().build();

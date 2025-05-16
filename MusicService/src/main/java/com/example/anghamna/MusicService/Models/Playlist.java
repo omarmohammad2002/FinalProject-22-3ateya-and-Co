@@ -3,7 +3,9 @@ package com.example.anghamna.MusicService.Models;
 
 import com.example.anghamna.MusicService.Models.Song;
 import com.example.anghamna.MusicService.Repositories.SongRepository;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -24,55 +26,55 @@ public class Playlist {
     @Column(columnDefinition = "UUID DEFAULT gen_random_uuid()")
     private UUID id;
 
-    @Column(nullable = false)
+//    @Column(nullable = false)
     private String name;
 
-    @Column(name = "owner_id", nullable = false)
+//    @Column(name = "owner_id", nullable = false)
     private UUID ownerId;
 
     //FIXME do we need to keep this as @Column?
-    @Column(name = "is_private")
+//    @Column(name = "is_private")
     private boolean isPrivate = true;
 
     @CreationTimestamp
-    @Column(name = "created_at")
+//    @Column(name = "created_at")
     private Date createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+//    @Column(name = "updated_at")
     private Date updatedAt;
 
-
-
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
     @JoinTable(
             name = "playlist_songs",
             joinColumns = @JoinColumn(name = "playlist_id"),
             inverseJoinColumns = @JoinColumn(name = "song_id")
     )
-    private List<Song> songs ;
+    private Set<Song> all_songs = new HashSet<>();
 
     // Constructors
-    public Playlist() {}
+    public Playlist() {
+        this.all_songs = new HashSet<>();
+    }
 
     public Playlist(String name, UUID ownerId, boolean isPrivate, Song song) {
         this.name = name;
         this.ownerId = ownerId;
         this.isPrivate = isPrivate;
         this.createdAt = Date.from(Instant.now());
-        this.songs = new ArrayList<Song>();
-        this.songs.add(song);
+//        this.songs = new ArrayList<Song>();
+        this.all_songs.add(song);
         this.updatedAt = Date.from(Instant.now());
 
 
     }
 
-    public Playlist(String name, UUID ownerId, boolean isPrivate, List<Song> songs) {
+    public Playlist(String name, UUID ownerId, boolean isPrivate, Set<Song> songs) {
         this.name = name;
         this.ownerId = ownerId;
         this.isPrivate = isPrivate;
         this.createdAt = Date.from(Instant.now());
-        this.songs = songs;
+        this.all_songs = songs;
         this.updatedAt = Date.from(Instant.now());
 
     }
@@ -138,12 +140,12 @@ public class Playlist {
         this.updatedAt = updatedAt;
     }
 
-    public List<Song> getSongs() {
-        return songs;
+    public Set<Song> getSongs() {
+        return all_songs;
     }
 
-    public void setSongs(List<Song> songs) {
-        this.songs = songs;
+    public void setSongs(Set<Song> songs) {
+        this.all_songs = (songs != null) ? songs : new HashSet<>();
     }
 
 

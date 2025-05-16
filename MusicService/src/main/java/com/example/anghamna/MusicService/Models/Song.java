@@ -8,9 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "songs")
@@ -22,7 +20,7 @@ public class Song {
 
     private String title;
 
-    @Column(name = "artist_id", nullable = false)
+//    @Column(name = "artist_id", nullable = false)
     private UUID artistId;
 
     private String genre;
@@ -30,20 +28,21 @@ public class Song {
     private int duration; // in seconds
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+//    @Column(name = "created_at", updatable = false)
     private Date createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+//    @Column(name = "updated_at")
     private Date updatedAt;
 
     private int likeCount = 0;
 
     private int streamCount = 0;
 
-//    @JsonBackReference
-    @ManyToMany(mappedBy = "songs", cascade = CascadeType.ALL)
-    private List<Playlist> playlists;
+    @JsonBackReference
+    @JsonIgnore
+    @ManyToMany(mappedBy = "all_songs", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Playlist> playlists = new HashSet<>();
 
 
     // when they call upload song we call on both create song in both services?
@@ -159,11 +158,11 @@ public class Song {
         this.streamCount = streamCount;
     }
 
-    public List<Playlist> getPlaylists() {
+    public Set<Playlist> getPlaylists() {
         return playlists;
     }
 
-    public void setPlaylists(List<Playlist> playlists) {
+    public void setPlaylists(Set<Playlist> playlists) {
         this.playlists = playlists;
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -37,7 +38,7 @@ public class SongController {
 
     // Get all songs
     @GetMapping("/")
-    public ResponseEntity<List<Song>> getAllSongs() {
+    public ResponseEntity<Set<Song>> getAllSongs() {
         return ResponseEntity.ok(songService.getAllSongs());
     }
 
@@ -51,19 +52,19 @@ public class SongController {
 
     // Get songs by artist
     @GetMapping("/artist/{artistId}")
-    public ResponseEntity<List<Song>> getSongsByArtist(@PathVariable UUID artistId) {
+    public ResponseEntity<Set<Song>> getSongsByArtist(@PathVariable UUID artistId) {
         return ResponseEntity.ok(songService.getSongsByArtist(artistId));
     }
 
     // Get songs by genre
     @GetMapping("/genre/{genre}")
-    public ResponseEntity<List<Song>> getSongsByGenre(@PathVariable String genre) {
+    public ResponseEntity<Set<Song>> getSongsByGenre(@PathVariable String genre) {
         return ResponseEntity.ok(songService.getSongsByGenre(genre));
     }
 
 
     @GetMapping("/getPlaylists/{songId}")
-    public List<Playlist> getPlaylistsBySongId(@PathVariable UUID songId) {
+    public Set<Playlist> getPlaylistsBySongId(@PathVariable UUID songId) {
         return songService.getSongById(songId).get().getPlaylists();
     }
 

@@ -10,6 +10,8 @@ import com.example.anghamna.MusicService.Repositories.SongRepository;
 import com.example.anghamna.MusicService.command.AddSongCommand;
 import com.example.anghamna.MusicService.command.PlaylistCommand;
 import com.example.anghamna.MusicService.command.RemoveSongCommand;
+import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.PreRemove;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -36,27 +38,30 @@ public class PlaylistService {
     // CREATE
 
     public Playlist createPlaylist(Playlist playlist) {
-        List<Song> inputSongs = playlist.getSongs();
-        if (inputSongs != null && !inputSongs.isEmpty()) {
+        Set<Song> inputSongs = playlist.getSongs();
+
+        if (inputSongs == null) {
+            playlist.setSongs(new HashSet<>()); // ensure it's never null
+        } else if (!inputSongs.isEmpty()) {
             List<UUID> songIds = inputSongs.stream()
                     .map(Song::getId)
                     .filter(Objects::nonNull)
                     .toList();
 
-            List<Song> managedSongs = songRepository.findAllById(songIds);
-            playlist.setSongs(managedSongs); // Only set managed ones
+            List<Song> songList = songRepository.findAllById(songIds);
+            Set<Song> managedSongs = new HashSet<>(songList);
+            playlist.setSongs(managedSongs);
         }
 
-        Playlist savedPlaylist = playlistRepository.save(playlist);
+        return playlistRepository.save(playlist);
 
-        // EAGER fetch is safer if you directly return JPA entities
-        savedPlaylist.getSongs().size(); // force loading if LAZY
-
-        return savedPlaylist;
     }
 
-    public List<Playlist> getAllPlaylists() {
-        return playlistRepository.findAll();
+    public Set<Playlist> getAllPlaylists() {
+        List<Playlist> playlists = playlistRepository.findAll();
+        Set<Playlist> playlists_set = new HashSet<>(playlists);
+        return playlists_set;
+
     }
 
     @Cacheable(value = "playlists",key = "#id")
@@ -66,14 +71,15 @@ public class PlaylistService {
     }
 
     @Cacheable(value = "playlists",key = "#ownerId")
-    public List<Playlist> getPlaylistsByUserId(UUID ownerId) {
-        // should check if its private and if the user is the owner
+    public Set<Playlist> getPlaylistsByUserId(UUID ownerId) {
         return playlistRepository.findByOwnerId(ownerId);
+
+        // should check if its private and if the user is the owner
     }
 
 
     // return all public playlists
-    public List<Playlist> getPublicPlaylists() {
+    public Set<Playlist> getPublicPlaylists() {
        return playlistRepository.findByIsPrivate(false);
     }
 
@@ -84,7 +90,7 @@ public class PlaylistService {
 //    }
 
 
-    public List<Song> getPlaylistSongs(UUID playlistId) {
+    public Set<Song> getPlaylistSongs(UUID playlistId) {
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new RuntimeException("Playlist not found"));
 
@@ -139,11 +145,37 @@ public class PlaylistService {
     }
 
 
-    public void deleteSongFromAllPlaylists(UUID songId){
-        playlistRepository.deleteSongFromAllPlaylists(songId);
+    @Transactional
+    public void deleteSongFromAllPlaylists(UUID songId) {
+        Song song = songRepository.findById(songId)
+                .orElseThrow(() -> new EntityNotFoundException("Song not found with id: " + songId));
+
+        // 2. Get only playlists containing this song
+        List<Playlist> playlists = playlistRepository.findBySongsId(songId);
+
+        // 3. Remove from both sides of the relationship
+        playlists.forEach(playlist -> {
+            // Remove song from playlist
+            boolean removed = playlist.getSongs().removeIf(s -> s.getId().equals(songId));
+
+            // Only update if the song was actually present
+            if (removed) {
+                // Remove playlist from song's collection
+                song.getPlaylists().remove(playlist);
+                playlistRepository.save(playlist);
+            }
+        });
+
+        // 4. Explicitly save the song if it's been modified
+        if (!playlists.isEmpty()) {
+            songRepository.save(song);
+        }
     }
 
 
+    public void saveAllPlaylists(Set<Playlist> playlists) {
+        playlistRepository.saveAll(playlists);
+    }
 
 
 
