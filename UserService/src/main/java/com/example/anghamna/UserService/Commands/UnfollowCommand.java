@@ -1,13 +1,9 @@
 package com.example.anghamna.UserService.Commands;
 
-import com.example.anghamna.UserService.Events.EventPublisher;
+import com.example.anghamna.UserService.rabbitmq.EventPublisher;
 import com.example.anghamna.UserService.Repositories.FollowRepository;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.CrossOrigin;
 
-import java.time.Instant;
-import java.util.Map;
 import java.util.UUID;
 
 public class UnfollowCommand implements CommandInterface {

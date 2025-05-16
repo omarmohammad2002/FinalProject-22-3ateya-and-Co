@@ -9,9 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.UUID;
 
 public class RemoveSongCommand  implements  PlaylistCommand{
-
-    //FIXME shouldnt i inject it?
-    //   @Autowired
     private final PlaylistRepository playlistRepository;
     private final SongRepository songRepository;
     private final UUID playlistId;
@@ -32,8 +29,12 @@ public class RemoveSongCommand  implements  PlaylistCommand{
         Playlist playlist = playlistRepository.findById(playlistId).orElse(null);
         Song song = songRepository.findById(songId).orElse(null);
         if (playlist != null) {
-            playlist.getSongs().remove(song);  // Removes from the in-memory object
+            boolean isPresent = playlist.getSongs().remove(song);  // Removes from the in-memory object
             playlistRepository.save(playlist);  // Persists changes
+            if (isPresent) {
+                song.getPlaylists().remove(playlist);
+                songRepository.save(song);
+            }
             System.out.println("Song removed: " + songId + " from playlist: " + playlistId);
         } else {
             System.out.println("Playlist not found: " + playlistId);

@@ -15,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -40,81 +42,127 @@ public class PlaylistController {
 
     //Create a playlist
     @PostMapping
-    public ResponseEntity<Playlist> createPlaylist(
-            @Valid @RequestBody Playlist request)
-          //  @RequestHeader("X-User-ID") Long userId)
+    public ResponseEntity<Playlist> createPlaylist(@RequestBody Playlist playlist, @CookieValue("USER_ID") String userIdCookie)
     {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(playlistService.createPlaylist(request/*, userId*/));
+        UUID userId = UUID.fromString(userIdCookie);
+        playlist.setOwnerId(userId);
+        Playlist created = playlistService.createPlaylist(playlist);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
+    //FIXME REVISE
     // Get Playlist by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Playlist> getPlaylistById(@PathVariable UUID id) {
-        return playlistService.getPlaylistById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Playlist> getPlaylistById(@PathVariable UUID id, @CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
+        Playlist playlist = playlistRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found"));
+        boolean isPrivate = playlist.isPrivate();
+        UUID ownerId = playlist.getOwnerId();
+        if(isPrivate ){
+            if(ownerId.equals(userId)){
+                Playlist result = playlistService.getPlaylistById(id)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found in service"));
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body(result);
+            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        Playlist result = playlistService.getPlaylistById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found in service"));
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(result);
     }
 
 
     // Get user playlists
 
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<Playlist>> getUserPlaylists(@PathVariable("id") UUID userId) {
-        return ResponseEntity.ok(playlistService.getPlaylistsByUserId(userId));
+    public ResponseEntity<Set<Playlist>> getUserPlaylists(@PathVariable("id") UUID userId, @CookieValue("USER_ID") String userIdCookie) {
+        UUID id = UUID.fromString(userIdCookie);
+        if(userId.equals(id)){
+            return ResponseEntity.ok(playlistService.getPlaylistsByUserId(userId));
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
 
 
     @GetMapping("/public")
-    public ResponseEntity<List<Playlist>> getPublicPlaylists() {
+    public ResponseEntity<Set<Playlist>> getPublicPlaylists() {
         return ResponseEntity.ok(playlistService.getPublicPlaylists());
     }
 
-
-
-
-    //FIXME need to ensure its the user who created the playlist
-    @PutMapping("/{id}")
-    public ResponseEntity<Playlist> updatePlaylist(@PathVariable UUID id, @RequestBody() Playlist playlist){
-        return playlistService.updatePlaylist(id, playlist)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    //FIXME REVISE
+    @GetMapping("/playlistSongs/{playlistId}")
+    public ResponseEntity<Set<Song>> getPlaylistSongs(@PathVariable UUID playlistId, @CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found"));
+        boolean isPrivate = playlist.isPrivate();
+        UUID ownerId = playlist.getOwnerId();
+        if(isPrivate){
+            if(ownerId.equals(userId)){
+                return ResponseEntity.ok(playlistService.getPlaylistSongs(playlistId));
+            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        return ResponseEntity.ok(playlistService.getPlaylistSongs(playlistId));
     }
 
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Playlist> updatePlaylist(@PathVariable UUID id, @RequestBody() Playlist playlist,
+                                                   @CookieValue("USER_ID") String userIdCookie){
+        UUID userId = UUID.fromString(userIdCookie);
+        if(playlist.getOwnerId().equals(userId)){
+            return playlistService.updatePlaylist(id, playlist)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        }
 
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+    }
 
+    @DeleteMapping("/{playlistId}")
+    public ResponseEntity<Void> deletePlaylist(@PathVariable UUID playlistId, @CookieValue("USER_ID") String userIdCookie) {
+            UUID userId = UUID.fromString(userIdCookie);
+            Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found"));
+            if(playlist.getOwnerId().equals(userId)){
+                playlistService.deletePlaylist(playlistId, userId);
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+    }
 
-
-    //   FIXME check who owns it, only user can delete it, how do we take it so we can pass it
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePlaylist(
-            @PathVariable UUID id,
-              @RequestHeader() UUID userId) { //FIXME is this how itll be passed
-        {
-            playlistService.deletePlaylist(id, userId);
-            return ResponseEntity.noContent().build();
+    @PatchMapping("privacy/{playlistId}")
+    public void togglePrivacy(@PathVariable UUID playlistId, @CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found"));
+        if(playlist.getOwnerId().equals(userId)){
+            playlistService.togglePrivacy(playlistId, userId);
         }
     }
 
-    //FIXME check who owns it and only they can toggle privacy
-    @PatchMapping("privacy/{id}/{userId}")
-    public void togglePrivacy(
-            @PathVariable UUID id,
-            @PathVariable() UUID userId) { //FIXME is this how itll be passed
-        playlistService.togglePrivacy(id, userId);
-    }
-
     @PostMapping("/{playlistId}/add")
-    public void addSong(@PathVariable UUID playlistId, @RequestBody() UUID songId) {
-        AddSongCommand addCommand = new AddSongCommand(playlistRepository,songRepository, playlistId, songId);
-        playlistService.addSong(addCommand);
+    public void addSong(@PathVariable UUID playlistId, @RequestBody() UUID songId, @CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found"));
+        if(playlist.getOwnerId().equals(userId)){
+            AddSongCommand addCommand = new AddSongCommand(playlistRepository,songRepository, playlistId, songId);
+            playlistService.addSong(addCommand);
+        }
     }
 
     @DeleteMapping("/{playlistId}/remove")
-    public void removeSong(@PathVariable UUID playlistId, @RequestBody() UUID songId) {
-        RemoveSongCommand removeCommand = new RemoveSongCommand(playlistRepository, songRepository, playlistId, songId);
-        playlistService.removeSong(removeCommand);
+    public void removeSong(@PathVariable UUID playlistId, @RequestBody() UUID songId, @CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
+        Playlist playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found"));
+        if(playlist.getOwnerId().equals(userId)) {
+            RemoveSongCommand removeCommand = new RemoveSongCommand(playlistRepository, songRepository, playlistId, songId);
+            playlistService.removeSong(removeCommand);
+        }
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.anghamna.MusicService.Models;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -7,9 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "songs")
@@ -21,7 +20,7 @@ public class Song {
 
     private String title;
 
-    @Column(name = "artist_id", nullable = false)
+//    @Column(name = "artist_id", nullable = false)
     private UUID artistId;
 
     private String genre;
@@ -29,23 +28,23 @@ public class Song {
     private int duration; // in seconds
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+//    @Column(name = "created_at", updatable = false)
     private Date createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+//    @Column(name = "updated_at")
     private Date updatedAt;
 
     private int likeCount = 0;
 
     private int streamCount = 0;
 
+    @JsonBackReference
     @JsonIgnore
-    @ManyToMany(mappedBy = "songs")
-    private List<Playlist> playlists;
+    @ManyToMany(mappedBy = "all_songs", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private Set<Playlist> playlists = new HashSet<>();
 
-    //FIXME revise with omar if we need it, we need to store the song url or have user?
-    private String songURL;
+
     // when they call upload song we call on both create song in both services?
     // or should this service send it to sttreaming and pass the strong id when we create it
 // we need to add the songURL field to the constructor and getters/setters
@@ -55,9 +54,8 @@ public class Song {
     // Constructors
     public Song() {}
 
-    public Song(String title, UUID artistId, String genre, int duration) {
+    public Song(String title, String genre, int duration) {
         this.title = title;
-        this.artistId = artistId;
         this.genre = genre;
         this.duration = duration;
         this.likeCount = 0;
@@ -159,4 +157,11 @@ public class Song {
         this.streamCount = streamCount;
     }
 
+    public Set<Playlist> getPlaylists() {
+        return playlists;
+    }
+
+    public void setPlaylists(Set<Playlist> playlists) {
+        this.playlists = playlists;
+    }
 }
