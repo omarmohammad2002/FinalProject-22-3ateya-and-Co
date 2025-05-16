@@ -71,8 +71,8 @@ public class SessionController {
     @GetMapping("/validate")
     public ResponseEntity<?> validateSession(@RequestParam("sessionId") int sessionId) {
         try {
-            UUID userId = sessionService.validateSession(sessionId);
-            return ResponseEntity.ok(userId); // return boolean for Feign client
+            Boolean valid = sessionService.validateSession(sessionId);
+            return ResponseEntity.ok(valid); // return boolean for Feign client
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(false);
         }
