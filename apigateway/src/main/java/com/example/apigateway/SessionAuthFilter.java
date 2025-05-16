@@ -1,5 +1,4 @@
 //package com.example.apigateway;
-//
 //import com.example.apigateway.UserClient;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.core.annotation.Order;
@@ -15,7 +14,6 @@
 //@Order(1)
 //public class SessionAuthFilter implements GlobalFilter {
 //
-////    @Autowired
 //    private UserClient userClient;
 //
 //    @Override
@@ -23,18 +21,19 @@
 //        String path = exchange.getRequest().getPath().toString();
 //
 //        // Skip authentication for login and register endpoints
-//        if (path.startsWith("/user/login") || path.startsWith("/user/register")) {
+//        if (path.startsWith("/userapi/sessions/login") || path.startsWith("/userapi/user/register")) {
 //            return chain.filter(exchange);
 //        }
 //
-//        HttpCookie sessionCookie = exchange.getRequest().getCookies().getFirst("SESSIONID");
+//
+//        HttpCookie sessionCookie = exchange.getRequest().getCookies().getFirst("SESSION_ID");
 //
 //        if (sessionCookie == null) {
 //            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
 //            return exchange.getResponse().setComplete();
 //        }
 //
-//        String sessionId = sessionCookie.getValue();
+//        int sessionId = Integer.parseInt(sessionCookie.getValue());
 //
 //        try {
 //            boolean isValid = userClient.validateSession(sessionId);
