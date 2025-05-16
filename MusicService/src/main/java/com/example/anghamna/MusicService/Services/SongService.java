@@ -163,6 +163,7 @@ public class SongService implements Subject {
 
     }
 
+    @Transactional
     @RabbitListener(queues = RabbitMQConfig.MUSIC_USER_DELETED_QUEUE)
     public void  deleteSongsByArtist(String message) {
 
