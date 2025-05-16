@@ -68,12 +68,13 @@ public class SessionService {
         sessionRepository.deleteById(sessionId);
     }
 
-    public UUID validateSession(int sessionId) {
+    public Boolean validateSession(int sessionId) {
         Optional<Session> sessionOptional = sessionRepository.findById(sessionId);
         if (sessionOptional.isEmpty() || sessionOptional.get().getExpiredAt().before(Date.from(Instant.now()))) {
             throw new RuntimeException("Invalid or expired session.");
         }
 
-        return sessionOptional.get().getUser().getId();
+        return true ;
+
     }
 }

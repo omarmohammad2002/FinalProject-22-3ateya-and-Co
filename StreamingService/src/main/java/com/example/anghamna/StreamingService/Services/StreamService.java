@@ -101,7 +101,9 @@ public class StreamService {
                         String.format("bytes %d-%d/%d", rangeStart, rangeEnd, fileSize));
 
                 logger.info("✅ Returning 206 Partial Content");
-                streamObservable.notifyObservers(songId);
+                if (rangeStart == 0 ) {
+                streamObservable.notifyObservers(songId); }
+
                 return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                         .headers(responseHeaders)
                         .body(new InputStreamResource(inputStream));
@@ -140,7 +142,7 @@ public class StreamService {
         AudioInputStream appendedFiles =
                 new AudioInputStream(
                         new SequenceInputStream(clip1, clip2),
-                        clip1.getFormat(),
+                        clip2.getFormat(),
                         clip1.getFrameLength() + clip2.getFrameLength());
 
         AudioSystem.write(appendedFiles, AudioFileFormat.Type.WAVE, output);

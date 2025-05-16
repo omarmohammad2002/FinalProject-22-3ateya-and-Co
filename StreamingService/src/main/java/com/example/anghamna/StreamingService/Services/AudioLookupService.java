@@ -23,6 +23,7 @@ public class AudioLookupService {
         return audioRepository.findBySongId(songId)
                 .orElseThrow(() -> new FileNotFoundException("Audio not found for songId: " + songId));
     }
+
     public File getAudioFile(Audio audio) throws IOException {
         File audioFile = new File(audio.getFilePath());
         if (!audioFile.exists()) {
