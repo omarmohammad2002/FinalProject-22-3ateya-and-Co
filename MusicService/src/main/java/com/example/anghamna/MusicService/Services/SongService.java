@@ -163,6 +163,7 @@ public class SongService implements Subject {
 
     }
 
+    @CacheEvict(value = "songs", key = "#artistId")
     @RabbitListener(queues = RabbitMQConfig.MUSIC_USER_DELETED_QUEUE)
     @Transactional
     public void  deleteSongsByArtist(UUID artistId) {

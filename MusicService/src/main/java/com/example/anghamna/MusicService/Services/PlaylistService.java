@@ -89,7 +89,7 @@ public class PlaylistService {
 //        return playlistRepository.findByIsPrivate(true);
 //    }
 
-
+    @Cacheable(value = "playlists",key = "#playlistId")
     public Set<Song> getPlaylistSongs(UUID playlistId) {
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new RuntimeException("Playlist not found"));
@@ -146,6 +146,7 @@ public class PlaylistService {
 
 
     @Transactional
+    @CacheEvict(value = "playlists", key = "#songId")
     public void deleteSongFromAllPlaylists(UUID songId) {
         Song song = songRepository.findById(songId)
                 .orElseThrow(() -> new EntityNotFoundException("Song not found with id: " + songId));
