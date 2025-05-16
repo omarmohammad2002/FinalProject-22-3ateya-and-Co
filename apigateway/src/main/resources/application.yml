@@ -9,26 +9,26 @@ spring:
     gateway:
       routes:
         - id: user-service
-          uri: http://localhost:8081
+          uri: http://user-service:8080
           predicates:
             - Path=/userapi/**
 
         - id: music-service-songs
-          uri: http://localhost:8082
+          uri: http://music-service:8080
           predicates:
             - Path=/songs/**
 
         - id: music-service-playlists
-          uri: http://localhost:8082
+          uri: http://music-service:8080
           predicates:
             - Path=/playlists/**
 
-        - id: socialmedia-service
-          uri: http://localhost:8083
-          predicates:
-            - Path=/socialmedia/**
+#        - id: socialmedia-service
+#          uri: http://socialmedia-service:8080
+#          predicates:
+#            - Path=/socialmedia/**
         - id: streaming-service
-          uri: http://localhost:8084
+          uri: http://streaming-service:8080
           predicates:
             - Path=/streaming/**
          
