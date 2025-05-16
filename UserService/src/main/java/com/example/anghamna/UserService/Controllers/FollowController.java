@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/user/follows")
+@RequestMapping("/userapi/follows")
 public class FollowController {
 
     private final FollowService followService;

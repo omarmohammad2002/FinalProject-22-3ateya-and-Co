@@ -1,6 +1,4 @@
 package com.example.anghamna.StreamingService.Observer;
-
-import com.example.anghamna.StreamingService.Models.StreamPlayedEvent;
 import com.example.anghamna.StreamingService.rabbitmq.StreamEventProducer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +16,6 @@ public class StreamCountObserver implements StreamObserver {
 
     @Override
     public void onStream(UUID songId) {
-        StreamPlayedEvent event = new StreamPlayedEvent();
-        event.setSongId(songId);
         logger.info("🎧 Stream event observed for songId: {}", songId);
         streamEventProducer.sendStreamPlayed(songId);
     }

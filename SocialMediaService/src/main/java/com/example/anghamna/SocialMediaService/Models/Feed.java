@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
+import java.util.UUID;
 
 @Document(collection = "feeds")
 public class Feed {
@@ -11,7 +12,7 @@ public class Feed {
     @Id
     private String id;
 
-    private String userId;        // Recipient of the feed item
+    private UUID userId;        // Recipient of the feed item
     private String postId;        // Can refer to a post, song, playlist, etc.
     private String type;          // Type of feed item: "post", "song", etc.
     private String sourceUserId;  // The user who triggered this feed
@@ -22,7 +23,7 @@ public class Feed {
     }
 
     // All-arguments constructor
-    public Feed(String id, String userId, String postId, String type, String sourceUserId, Date timestamp) {
+    public Feed(String id, UUID userId, String postId, String type, String sourceUserId, Date timestamp) {
         this.id = id;
         this.userId = userId;
         this.postId = postId;
@@ -41,11 +42,11 @@ public class Feed {
         this.id = id;
     }
 
-    public String getUserId() {
+    public UUID getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(UUID userId) {
         this.userId = userId;
     }
 

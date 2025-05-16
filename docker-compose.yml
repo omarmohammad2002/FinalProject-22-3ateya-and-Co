@@ -82,13 +82,13 @@ services:
     restart: always
 
   # User Service
-  user-app:
+  user-service:
     build:
       context: ./UserService
       dockerfile: Dockerfile
-    container_name: userApp
+    container_name: user-service-app
     ports:
-      - "8080:8080"
+      - "8081:8080"
     depends_on:
       - postgres_users
       - redis_cache
@@ -137,4 +137,18 @@ services:
     environment:
       - spring.data.mongodb.uri=mongodb://root:example@mongo:27017/3ateya_and_Co?authSource=admin
       - spring.data.mongodb.database=3ateya_and_Co
+    restart: always
+
+  api-gateway:
+    build:
+      context: ./apigateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - user-service
+      - music-service
+      - streaming-service
+#      - socialmedia-service
     restart: always
