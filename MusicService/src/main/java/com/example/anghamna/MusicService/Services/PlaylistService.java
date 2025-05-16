@@ -66,7 +66,6 @@ public class PlaylistService {
 
     @Cacheable(value = "playlists",key = "#id")
     public Optional<Playlist> getPlaylistById(UUID id) {
-        //FIXME should check if its private and if the user is the owner
         return playlistRepository.findById(id);
     }
 
@@ -111,8 +110,6 @@ public class PlaylistService {
     }
 
     // DELETE
-
-    //FIXME retrieve user id from cookie and verify with owner of playlist to delete
     @CacheEvict(value = "playlists", key = "#id")
     public void deletePlaylist(UUID id, UUID ownerId) {
         if (!playlistRepository.existsByIdAndOwnerId(id, ownerId)) {
@@ -121,7 +118,7 @@ public class PlaylistService {
         playlistRepository.deleteById(id);
     }
 
-    //TODO fix this entire method bec it sends back 404
+    //TODO test this
     public void togglePrivacy(UUID id, UUID ownerId) {
         Playlist playlist = playlistRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Playlist not found"));

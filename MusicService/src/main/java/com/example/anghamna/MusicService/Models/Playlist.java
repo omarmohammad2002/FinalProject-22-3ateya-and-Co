@@ -32,7 +32,6 @@ public class Playlist {
 //    @Column(name = "owner_id", nullable = false)
     private UUID ownerId;
 
-    //FIXME do we need to keep this as @Column?
 //    @Column(name = "is_private")
     private boolean isPrivate = true;
 
@@ -147,20 +146,4 @@ public class Playlist {
         this.all_songs = (songs != null) ? songs : new HashSet<>();
     }
 
-
-
-
-
-    //FIXMe implement add song in playlist and remove.. when adding
-    // we have to choose the playlist we want to add the song to
-//    // Helper methods
-//    public void addSong(Song song) {
-//        this.songs.add(song);
-//        song.getPlaylists().add(this);
-//    }
-//
-//    public void removeSong(Song song) {
-//        this.songs.remove(song);
-//        song.getPlaylists().remove(this);
-//    }
 }

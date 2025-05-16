@@ -99,10 +99,6 @@ public class SongController {
        songService.streamedSong(id);
    }
 
-
-//FIXME the respone entities being returned?
-    // Delete song
-
     @DeleteMapping("/{songId}")
     public ResponseEntity<Void> deleteSong(@PathVariable UUID songId, @CookieValue("USER_ID") String userIdCookie) {
         UUID userId = UUID.fromString(userIdCookie);
