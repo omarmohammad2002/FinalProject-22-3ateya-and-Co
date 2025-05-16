@@ -164,24 +164,21 @@ public class SongService implements Subject {
     }
 
     @RabbitListener(queues = RabbitMQConfig.MUSIC_USER_DELETED_QUEUE)
+    @Transactional
     public void  deleteSongsByArtist(UUID artistId) {
-
-
         Set<Song> songs = songRepository.findByArtistId(artistId);
 
             if (!songs.isEmpty()) {
                 for (Song song : songs) {
-                   // deleteSong(song.getId());
-
-
                     // Detach song from all playlists (Hibernate-aware)
                     Set<Playlist> playlists = song.getPlaylists();
                     for (Playlist playlist : playlists) {
                         playlistService.deleteSongFromAllPlaylists(song.getId());
+                        if(playlist.getOwnerId().equals(artistId)){
+                            playlistService.deletePlaylist(playlist.getId(), artistId);
+                        }
 
                     }
-                    // Save all updated playlists
-                    playlistService.saveAllPlaylists(playlists);
 
                     // Now delete song safely
                     songRepository.delete(song);
@@ -190,9 +187,6 @@ public class SongService implements Subject {
                     notifyObservers(song.getId());
                 }
             }
-
-
-       // return false;
     }
 
 
