@@ -1,6 +1,6 @@
 package com.example.anghamna.UserService.Services;
 import com.example.anghamna.UserService.DTOs.RegisterRequest;
-import com.example.anghamna.UserService.Events.EventPublisher;
+import com.example.anghamna.UserService.rabbitmq.EventPublisher;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Models.UserType;
 import com.example.anghamna.UserService.Repositories.FollowRepository;
@@ -129,9 +129,9 @@ public class UserService {
 
         followRepository.deleteByFollowerId(id);
         followRepository.deleteByFollowedId(id);
+        eventPublisher.publishUserDeletedEvent(id);
 
         userRepository.delete(user);
-//        eventPublisher.publishUserDeletedEvent(id);
     }
 
     public String getUserType(UUID id) {

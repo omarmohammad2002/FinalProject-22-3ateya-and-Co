@@ -163,27 +163,36 @@ public class SongService implements Subject {
 
     }
 
-    @RabbitListener(queues = RabbitMQConfig.USER_DELETED_QUEUE)
-    public boolean  deleteSongsByArtist(UUID artistId) {
+    @RabbitListener(queues = RabbitMQConfig.MUSIC_USER_DELETED_QUEUE)
+    public void  deleteSongsByArtist(UUID artistId) {
+
 
         Set<Song> songs = songRepository.findByArtistId(artistId);
-//        UUID hardcodedArtistID = UUID.fromString("b35a6f2c-972c-4dd3-876c-45a3a5ce0d1f");
-//        Set<Song> songs = songRepository.findByArtistId(hardcodedArtistID);
-        if (!songs.isEmpty()) {
 
-            //songRepository.deleteAll(songs);
-            // Notify observers for each deleted song
-            for (Song song : songs) {
-                //notify streaming service that song is deleted
-//                musicProducer.sendSongDeleted(song.getId());
-//                notifyObservers(song.getId());
-                this.deleteSong(song.getId());
+            if (!songs.isEmpty()) {
+                for (Song song : songs) {
+                   // deleteSong(song.getId());
+
+
+                    // Detach song from all playlists (Hibernate-aware)
+                    Set<Playlist> playlists = song.getPlaylists();
+                    for (Playlist playlist : playlists) {
+                        playlistService.deleteSongFromAllPlaylists(song.getId());
+
+                    }
+                    // Save all updated playlists
+                    playlistService.saveAllPlaylists(playlists);
+
+                    // Now delete song safely
+                    songRepository.delete(song);
+
+                    // Notify
+                    notifyObservers(song.getId());
+                }
             }
-            return true;
 
-        }
 
-        return false;
+       // return false;
     }
 
 

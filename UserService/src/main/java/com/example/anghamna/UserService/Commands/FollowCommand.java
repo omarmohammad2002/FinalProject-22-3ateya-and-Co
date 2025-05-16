@@ -1,12 +1,9 @@
 package com.example.anghamna.UserService.Commands;
 
-import com.example.anghamna.UserService.Events.EventPublisher;
+import com.example.anghamna.UserService.rabbitmq.EventPublisher;
 import com.example.anghamna.UserService.Models.Follow;
 import com.example.anghamna.UserService.Repositories.FollowRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.Instant;
-import java.util.Map;
 import java.util.UUID;
 
 public class FollowCommand implements CommandInterface {

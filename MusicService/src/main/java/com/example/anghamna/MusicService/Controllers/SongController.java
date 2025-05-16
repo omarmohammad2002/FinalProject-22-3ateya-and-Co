@@ -145,12 +145,12 @@ public class SongController {
     //Delete song by artist
 
     @DeleteMapping("/artist/{artistId}")
-    public ResponseEntity<Void> deleteSongsByArtist(@PathVariable UUID artistId) {
-        if (songService.deleteSongsByArtist(artistId)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public void deleteSongsByArtist(@PathVariable UUID artistId) {
+       songService.deleteSongsByArtist(artistId);
+//            return ResponseEntity.noContent().build();
+//        } else {
+//            return ResponseEntity.notFound().build();
+//        }
     }
 
 //    //Delete a specific song + ensure its the user thats the artist

@@ -15,8 +15,11 @@ import org.springframework.amqp.core.Queue;
 public class RabbitMQConfig {
 
     //exchanges
+    //streaming exchange
     public static final String EXCHANGE = "music_exchange";
-    public static final String USER_EXCHANGE = "music.events";
+
+    //user exchange
+    public static final String MUSIC_EVENT_EXCHANGE = "music.events";
 
     //song liked
 //    public static final String SONG_LIKED_QUEUE = "song_liked_queue";
@@ -31,11 +34,11 @@ public class RabbitMQConfig {
     public static final String SONG_DELETED_ROUTING_KEY = "song.deleted";
 
     //user deleted
-    public static final String USER_DELETED_QUEUE = "music.user_deleted";
-    public static final String USER_DELETED_ROUTING_KEY = "user_deleted_routing";
+    public static final String MUSIC_USER_DELETED_QUEUE = "music.user_deleted";
+    public static final String USER_DELETED_ROUTING_KEY = "user.deleted";
 
 
-    //exchange
+    //exchange with streaming
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange(EXCHANGE);
@@ -43,8 +46,8 @@ public class RabbitMQConfig {
 
     //user exchange
     @Bean
-    public TopicExchange userExchange() {
-        return new TopicExchange(USER_EXCHANGE);
+    public TopicExchange musicEventsExchange() {
+        return new TopicExchange(MUSIC_EVENT_EXCHANGE);
     }
 
     //song liked queue and binding
@@ -90,15 +93,15 @@ public class RabbitMQConfig {
 
     //user deleted queue and binding
     @Bean
-    public Queue userQueue() {
-        return new Queue(USER_DELETED_QUEUE);
+    public Queue musicUserDeletedQueue() {
+        return new Queue(MUSIC_USER_DELETED_QUEUE);
     }
 
     @Bean
-    public Binding userBinding(Queue userQueue, TopicExchange userExchange) {
+    public Binding userBinding(Queue musicUserDeletedQueue, TopicExchange musicEventsExchange) {
         return BindingBuilder
-                .bind(userQueue)
-                .to(userExchange)
+                .bind(musicUserDeletedQueue)
+                .to(musicEventsExchange)
                 .with(USER_DELETED_ROUTING_KEY);
     }
 
