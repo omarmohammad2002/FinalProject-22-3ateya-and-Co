@@ -139,8 +139,8 @@ services:
       - spring.data.mongodb.database=3ateya_and_Co
     restart: always
 
-    # Streaming Service
-  scoialmedia-service:
+    # Social Media Service
+  socialmedia-service:
     build:
       context: ./SocialMediaService
       dockerfile: Dockerfile
