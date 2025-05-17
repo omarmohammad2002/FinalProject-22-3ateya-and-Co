@@ -58,7 +58,7 @@ public class EventPublisher  implements Subject {
     }
 
     @Override
-    public void notifyObservers(UUID userId) {
+    public void notifyObserversUserDeleted(UUID userId) {
         for (Observer observer : observers) {
             observer.onUserDeleted(userId);
         }
