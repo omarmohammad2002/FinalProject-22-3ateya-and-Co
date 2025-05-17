@@ -5,9 +5,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 import java.util.UUID;
 
-@FeignClient(name = "UserService", url = "http://localhost:8080/users")
+@FeignClient(name = "UserService", url = "http://userApp:8080/userapi/follows")
 public interface UserClient {
 
-    @GetMapping("/followings/{userId}")
-    List<String> getFollowings(@PathVariable UUID userId);
+    @GetMapping("{userId}/following/ids")
+    List<UUID> getFollowings(@PathVariable UUID userId);
 }

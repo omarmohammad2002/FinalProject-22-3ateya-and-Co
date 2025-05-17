@@ -1,16 +1,14 @@
 package com.example.anghamna.SocialMediaService.Services;
 
 import com.example.anghamna.SocialMediaService.Models.Like;
+import com.example.anghamna.SocialMediaService.Models.Post;
 import com.example.anghamna.SocialMediaService.Repositories.LikeRepository;
 import com.example.anghamna.SocialMediaService.Repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -22,39 +20,52 @@ public class LikeService {
     @Autowired
     private PostRepository postRepository;
 
-    @Cacheable(value = "likeStatus", key = "#postId + '_' + #userId")
+    /** Check if the user has already liked the post */
     public boolean isPostLikedByUser(String postId, UUID userId) {
         return likeRepository.findByPostIdAndUserId(postId, userId).isPresent();
     }
 
-    @CacheEvict(value = "likeStatus", key = "#postId + '_' + #userId")
+    /** Like a post if it exists and hasn't been liked by this user yet */
     public void likePost(String postId, UUID userId) {
+        Optional<Post> postOpt = postRepository.findById(postId);
+        if (postOpt.isEmpty()) {
+            throw new IllegalArgumentException("Post with ID " + postId + " does not exist.");
+        }
+
         likeRepository.findByPostIdAndUserId(postId, userId).ifPresentOrElse(
-                like -> {},
+                like -> {}, // Already liked, do nothing
                 () -> {
                     likeRepository.save(new Like(postId, userId));
-                    postRepository.findById(postId).ifPresent(post -> {
-                        post.setLikesCount(post.getLikesCount() + 1);
-                        postRepository.save(post);
-                    });
+                    Post post = postOpt.get();
+                    post.setLikesCount(post.getLikesCount() + 1);
+                    postRepository.save(post);
                 }
         );
     }
 
-    @CacheEvict(value = "likeStatus", key = "#postId + '_' + #userId")
+    /** Unlike a post only if the user has previously liked it */
     public void unlikePost(String postId, UUID userId) {
-        likeRepository.findByPostIdAndUserId(postId, userId).ifPresent(like -> {
-            likeRepository.delete(like);
-            postRepository.findById(postId).ifPresent(post -> {
-                int currentLikes = post.getLikesCount();
-                post.setLikesCount(Math.max(0, currentLikes - 1));
-                postRepository.save(post);
-            });
-        });
+        Optional<Post> postOpt = postRepository.findById(postId);
+        if (postOpt.isEmpty()) {
+            throw new IllegalArgumentException("Post with ID " + postId + " does not exist.");
+        }
+
+        Optional<Like> likeOpt = likeRepository.findByPostIdAndUserId(postId, userId);
+        if (likeOpt.isEmpty()) {
+            throw new IllegalStateException("User has not liked this post and cannot unlike it.");
+        }
+
+        // Proceed with unlike
+        likeRepository.delete(likeOpt.get());
+
+        Post post = postOpt.get();
+        int currentLikes = post.getLikesCount();
+        post.setLikesCount(Math.max(0, currentLikes - 1));
+        postRepository.save(post);
     }
 
     // ----------------------------
-    // Command Pattern with Reflection Inside
+    // Command Pattern Implementation
     // ----------------------------
 
     public interface LikeCommand {
@@ -75,7 +86,7 @@ public class LikeService {
         @Override
         public void execute() {
             try {
-                Method method = LikeService.class.getMethod(action + "Post", String.class, String.class);
+                Method method = LikeService.class.getMethod(action + "Post", String.class, UUID.class);
                 method.invoke(LikeService.this, postId, userId);
             } catch (Exception e) {
                 throw new RuntimeException("Failed to execute action: " + action, e);

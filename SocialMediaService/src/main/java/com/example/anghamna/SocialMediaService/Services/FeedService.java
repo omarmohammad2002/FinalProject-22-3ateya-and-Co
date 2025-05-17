@@ -21,13 +21,13 @@ public class FeedService {
         this.feedRepository = feedRepository;
     }
 
-    public Feed createFeed(Feed feed) {
-        feed.setTimestamp(new Date());
-        return feedRepository.save(feed);
-    }
-
-    @Cacheable(value = "userFeeds", key = "#userId")
-    public List<Feed> getFeedsForUser(String userId) {
-        return feedRepository.findByUserIdOrderByTimestampDesc(userId);
-    }
+//    public Feed createFeed(Feed feed) {
+//        feed.setTimestamp(new Date());
+//        return feedRepository.save(feed);
+//    }
+//
+//    @Cacheable(value = "userFeeds", key = "#userId")
+//    public List<Feed> getFeedsForUser(String userId) {
+//        return feedRepository.findByUserIdOrderByTimestampDesc(userId);
+//    }
 }

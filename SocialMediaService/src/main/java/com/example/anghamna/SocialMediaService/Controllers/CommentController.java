@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/comments")
@@ -15,9 +16,13 @@ public class CommentController {
     @Autowired
     private CommentService commentService;
 
-    @PostMapping
-    public ResponseEntity<Comment> createComment(@RequestBody Comment comment) {
-        Comment created = commentService.createComment(comment);
+    /** Create a new comment for a post */
+    @PostMapping("/{postId}")
+    public ResponseEntity<Comment> createComment(@PathVariable String postId,
+                                                 @RequestBody String commentText,
+                                                 @CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
+        Comment created = commentService.createComment(postId, commentText, userId);
         return ResponseEntity.ok(created);
     }
 
@@ -29,15 +34,20 @@ public class CommentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Comment> editComment(@PathVariable String id, @RequestBody String newText) {
-        Optional<Comment> updated = commentService.editComment(id, newText);
+    public ResponseEntity<Comment> editComment(@PathVariable String id,
+                                               @RequestBody String newText,
+                                               @CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
+        Optional<Comment> updated = commentService.editComment(id, newText, userId);
         return updated.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteComment(@PathVariable String id) {
-        boolean deleted = commentService.deleteComment(id);
+    public ResponseEntity<Void> deleteComment(@PathVariable String id,
+                                              @CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
+        boolean deleted = commentService.deleteComment(id, userId);
         return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
 }
