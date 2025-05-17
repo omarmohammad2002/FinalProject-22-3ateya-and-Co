@@ -1,17 +1,13 @@
 package com.example.anghamna.MusicService.Controllers;
 
 
-import com.example.anghamna.MusicService.Models.Playlist;
 import com.example.anghamna.MusicService.Models.Song;
-import com.example.anghamna.MusicService.Services.PlaylistService;
 import com.example.anghamna.MusicService.Services.SongService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -65,13 +61,6 @@ public class SongController {
     public ResponseEntity<Set<Song>> getSongsByGenre(@PathVariable String genre) {
         return ResponseEntity.ok(songService.getSongsByGenre(genre));
     }
-
-
-//    @GetMapping("/getPlaylists/{songId}")
-//    public Set<Playlist> getPlaylistsBySongId(@PathVariable UUID songId) {
-//        return songService.getSongById(songId).get().getPlaylists();
-//    }
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Song> updateSong(@PathVariable UUID id, @Valid @RequestBody Song updatedSong,

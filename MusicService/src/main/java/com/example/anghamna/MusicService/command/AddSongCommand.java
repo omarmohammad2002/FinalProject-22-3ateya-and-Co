@@ -4,7 +4,6 @@ import com.example.anghamna.MusicService.Models.Playlist;
 import com.example.anghamna.MusicService.Models.Song;
 import com.example.anghamna.MusicService.Repositories.PlaylistRepository;
 import com.example.anghamna.MusicService.Repositories.SongRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
 
@@ -22,16 +21,13 @@ public class AddSongCommand  implements  PlaylistCommand{
         this.songId = songId;
     }
 
-
-
-
     @Override
     public void execute() {
         Playlist playlist = playlistRepository.findById(playlistId).orElse(null);
         Song song = songRepository.findById(songId).orElse(null);
         if (playlist != null) {
-            playlist.getSongs().add(song);  // Adds from the in-memory object
-            playlistRepository.save(playlist);  // Persists changes
+            playlist.getSongs().add(song);
+            playlistRepository.save(playlist);
             System.out.println("Song addd: " + songId + " from playlist: " + playlistId);
         } else {
             System.out.println("Playlist not found: " + playlistId);
@@ -39,21 +35,6 @@ public class AddSongCommand  implements  PlaylistCommand{
     }
 }
 
-//    public String getSongId() {
-//        return songId;
-//    }
-//
-//    public void setSongId(String songId) {
-//        this.songId = songId;
-//    }
-//
-//    public String getPlaylistId() {
-//        return playlistId;
-//    }
-//
-//    public void setPlaylistId(String playlistId) {
-//        this.playlistId = playlistId;
-//    }
 
 
 

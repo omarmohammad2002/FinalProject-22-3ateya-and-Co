@@ -1,11 +1,8 @@
 package com.example.anghamna.MusicService.Services;
 
 
-//import com.example.anghamna.MusicService.Clients.UserClient;
 import com.example.anghamna.MusicService.Models.Playlist;
 import com.example.anghamna.MusicService.Models.Song;
-
-import com.example.anghamna.MusicService.Repositories.PlaylistRepository;
 import com.example.anghamna.MusicService.Repositories.SongRepository;
 import com.example.anghamna.MusicService.observers.SongObserver;
 import com.example.anghamna.MusicService.observers.Subject;
@@ -20,9 +17,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
-import com.example.anghamna.MusicService.observers.Observer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
@@ -40,25 +34,15 @@ public class SongService implements Subject {
     private MusicProducer musicProducer;
     //observer
     private SongObserver songObserver;
-    //feign client
-//    @Autowired
-//    private UserClient userClient;
 
     public SongService(SongRepository songRepository, MusicProducer musicProducer, PlaylistService playlistService, SongObserver songObserver) {
         this.songRepository = songRepository;
         this.musicProducer = musicProducer;
         this.songObserver = songObserver;
         this.playlistService = playlistService;
-        //this.userClient = userClient; //FIXME we need to fetch it from the request or cookie?
     }
 
     public Song createSong(Song song) {
-//        User user = userClient.getUserById(song.getArtistId());
-//
-//        if(user == null) {
-//            throw new RuntimeException("User not found");
-//        }
-
         return songRepository.save(song);
     }
 
@@ -84,11 +68,6 @@ public class SongService implements Subject {
         return songRepository.findByGenreIgnoreCase(genre);
     }
 
-//    //revise this if it should be cachable or cacheput
-//    @CachePut(value = "song_cache",key = "'title_' + #title.toLowerCase()")
-//    public List<Song> searchSongsByTitle(String title) {
-//        return songRepository.findByTitleContainingIgnoreCase(title);
-//    }
     @CachePut(value = "songs",key = "#id")
     public Optional<Song> updateSong(UUID id, Song updatedSong) {
         return songRepository.findById(id).map(existingSong -> {
@@ -108,39 +87,19 @@ public class SongService implements Subject {
         if (songOptional.isPresent()) {
             Song song = songOptional.get();
 
-            // Detach song from all playlists (Hibernate-aware)
             Set<Playlist> playlists = song.getPlaylists();
             for (Playlist playlist : playlists) {
                 playlistService.deleteSongFromAllPlaylists(song.getId());
             }
-            // Save all updated playlists
             playlistService.saveAllPlaylists(playlists);
 
-            // Now delete song safely
             songRepository.delete(song);
 
-            // Notify
             notifyObservers(id);
             return true;
         }
         return false;
     }
-
-
-//    // New: Top Streamed Songs
-//    @Cacheable(value = "song_cache",key = "'top_' + #limit")
-//    public List<Song> getTopStreamedSongs(int limit) {
-//        return songRepository.findTopByOrderByStreamCountDesc(limit);
-//    }
-
-//    // New: Get Random Song
-//    public Optional<Song> getRandomSong() {
-//        List<Song> allSongs = songRepository.findAll();
-//        if (allSongs.isEmpty()) return Optional.empty();
-//        Random random = new Random();
-//        return Optional.of(allSongs.get(random.nextInt(allSongs.size())));
-//    }
-
 
     public boolean likedSong(UUID id) {
         Song song = songRepository.findById(id).orElse(null);
@@ -169,53 +128,28 @@ public class SongService implements Subject {
     public void  deleteSongsByArtist(String artistId) {
         UUID id = UUID.fromString(artistId);
         Set<Song> songs = songRepository.findByArtistId(id);
-
             if (!songs.isEmpty()) {
                 for (Song song : songs) {
-                   // deleteSong(song.getId());
-
-
-                    // Detach song from all playlists (Hibernate-aware)
                     Set<Playlist> playlists = song.getPlaylists();
                     for (Playlist playlist : playlists) {
                         playlistService.deleteSongFromAllPlaylists(song.getId());
                         if(playlist.getOwnerId().equals(artistId)){
                             playlistService.deletePlaylist(playlist.getId(), id);
                         }
-
                     }
-                    // Save all updated playlists
+
                     playlistService.saveAllPlaylists(playlists);
 
-                    // Now delete song safely
                     songRepository.delete(song);
 
-                    // Notify
                     notifyObservers(song.getId());
                 }
             }
-
-
-       // return false;
     }
-
-
-    //observer
-//    @Override
-//    public void registerObserver(Observer o){
-//        observers.add(o);
-//    }
-//
-//    @Override
-//    public void removeObserver(Observer o){
-//        observers.remove(o);
-//    }
 
     @Override
     public void notifyObservers(UUID songId) {
-        //for (Observer observer : observers) {
         songObserver.onSongDeleted(songId);
-        //}
     }
 
 

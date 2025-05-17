@@ -5,13 +5,10 @@ package com.example.anghamna.MusicService.Services;
 import com.example.anghamna.MusicService.Models.Song;
 import com.example.anghamna.MusicService.Repositories.PlaylistRepository;
 import com.example.anghamna.MusicService.Models.Playlist;
-//import lombok.RequiredArgsConstructor;
 import com.example.anghamna.MusicService.Repositories.SongRepository;
 import com.example.anghamna.MusicService.command.AddSongCommand;
-import com.example.anghamna.MusicService.command.PlaylistCommand;
 import com.example.anghamna.MusicService.command.RemoveSongCommand;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PreRemove;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -35,13 +32,12 @@ public class PlaylistService {
     public PlaylistService(PlaylistRepository playlistRepository) {
         this.playlistRepository = playlistRepository;
     }
-    // CREATE
 
     public Playlist createPlaylist(Playlist playlist) {
         Set<Song> inputSongs = playlist.getSongs();
 
         if (inputSongs == null) {
-            playlist.setSongs(new HashSet<>()); // ensure it's never null
+            playlist.setSongs(new HashSet<>());
         } else if (!inputSongs.isEmpty()) {
             List<UUID> songIds = inputSongs.stream()
                     .map(Song::getId)
@@ -72,8 +68,6 @@ public class PlaylistService {
     @Cacheable(value = "playlists",key = "#ownerId")
     public Set<Playlist> getPlaylistsByUserId(UUID ownerId) {
         return playlistRepository.findByOwnerId(ownerId);
-
-        // should check if its private and if the user is the owner
     }
 
 
@@ -82,11 +76,6 @@ public class PlaylistService {
        return playlistRepository.findByIsPrivate(false);
     }
 
-//    // return all private playlists (by yser only)
-//     should only be by the user
-//    public List<Playlist> getPrivatePlaylists() {
-//        return playlistRepository.findByIsPrivate(true);
-//    }
 
     @Cacheable(value = "playlists",key = "#playlistId")
     public Set<Song> getPlaylistSongs(UUID playlistId) {
@@ -118,7 +107,6 @@ public class PlaylistService {
         playlistRepository.deleteById(id);
     }
 
-    //TODO test this
     public void togglePrivacy(UUID id, UUID ownerId) {
         Playlist playlist = playlistRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Playlist not found"));
@@ -148,23 +136,17 @@ public class PlaylistService {
         Song song = songRepository.findById(songId)
                 .orElseThrow(() -> new EntityNotFoundException("Song not found with id: " + songId));
 
-        // 2. Get only playlists containing this song
         List<Playlist> playlists = playlistRepository.findBySongsId(songId);
 
-        // 3. Remove from both sides of the relationship
         playlists.forEach(playlist -> {
-            // Remove song from playlist
             boolean removed = playlist.getSongs().removeIf(s -> s.getId().equals(songId));
 
-            // Only update if the song was actually present
             if (removed) {
-                // Remove playlist from song's collection
                 song.getPlaylists().remove(playlist);
                 playlistRepository.save(playlist);
             }
         });
 
-        // 4. Explicitly save the song if it's been modified
         if (!playlists.isEmpty()) {
             songRepository.save(song);
         }
@@ -175,20 +157,4 @@ public class PlaylistService {
         playlistRepository.saveAll(playlists);
     }
 
-
-
-
-    //UPDATE this is the dto thingy
-//    // Mapper
-//    private Playlist mapToResponse(Playlist playlist) {
-//        return Playlist.builder()
-//                .id(playlist.getId())
-//                .name(playlist.getName())
-//                .ownerId(playlist.getOwnerId())
-//                .isPrivate(playlist.isPrivate())
-//                .createdAt(playlist.getCreatedAt())
-//                .updatedAt(playlist.getUpdatedAt())
-//                .songCount(playlist.getSongs().size())
-//                .build();
-//    }
 }
