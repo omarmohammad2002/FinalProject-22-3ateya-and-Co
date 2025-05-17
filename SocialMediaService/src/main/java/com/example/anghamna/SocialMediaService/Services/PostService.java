@@ -8,6 +8,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,9 +36,26 @@ public class PostService {
     /** Get news feed for a user (cached by userId) */
     //@Cacheable(value = "newsFeed", key = "#userId")
     public List<Post> getNewsFeedForUser(UUID userId) {
-        List<UUID> followings = userClient.getFollowings(userId);
-        return postRepository.findByUserIdIn(followings);
+        try {
+
+            List<UUID> followings = userClient.getFollowings(userId);
+            System.out.println("Followings for user " + userId + ": " + followings);
+
+            if (followings == null || followings.isEmpty()) {
+                return Collections.emptyList();
+            }
+
+            List<Post> posts = postRepository.findByUserIdIn(followings);
+            System.out.println("Posts found: " + posts);
+
+            return posts;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
     }
+
 
     /** Get all public posts */
     public List<Post> getAllPublicPosts() {
