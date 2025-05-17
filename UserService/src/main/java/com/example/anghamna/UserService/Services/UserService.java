@@ -132,7 +132,7 @@ public class UserService {
 
         followRepository.deleteByFollowerId(id);
         followRepository.deleteByFollowedId(id);
-        eventPublisher.publishUserDeletedEvent(id);
+        eventPublisher.notifyObservers(id);
         logger.info("🎧 User deleted sent for userID: {}", id);
 
         userRepository.delete(user);
