@@ -101,7 +101,9 @@ public class StreamService {
                         String.format("bytes %d-%d/%d", rangeStart, rangeEnd, fileSize));
 
                 logger.info("✅ Returning 206 Partial Content");
-                streamObservable.notifyObservers(songId);
+                if (rangeStart == 0 ) {
+                streamObservable.notifyObservers(songId); }
+
                 return ResponseEntity.status(HttpStatus.PARTIAL_CONTENT)
                         .headers(responseHeaders)
                         .body(new InputStreamResource(inputStream));

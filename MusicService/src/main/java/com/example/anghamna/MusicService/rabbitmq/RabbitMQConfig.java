@@ -15,8 +15,14 @@ import org.springframework.amqp.core.Queue;
 public class RabbitMQConfig {
 
     //exchanges
+    //streaming exchange
     public static final String EXCHANGE = "music_exchange";
-    public static final String USER_EXCHANGE = "music.events";
+
+    //user deleted exchange
+    //public static final String MUSIC_EVENT_EXCHANGE = "music.events";
+    public static final String MUSIC_USER_DELETED_QUEUE = "music.user_deleted";
+    public static final String USER_DELETED_ROUTING_KEY = "user.deleted";
+
 
     //song liked
 //    public static final String SONG_LIKED_QUEUE = "song_liked_queue";
@@ -30,22 +36,19 @@ public class RabbitMQConfig {
     public static final String SONG_DELETED_QUEUE = "song_deleted_queue";
     public static final String SONG_DELETED_ROUTING_KEY = "song.deleted";
 
-    //user deleted
-    public static final String USER_DELETED_QUEUE = "music.user_deleted";
-    public static final String USER_DELETED_ROUTING_KEY = "user_deleted_routing";
 
 
-    //exchange
+    //exchange with streaming
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange(EXCHANGE);
     }
 
     //user exchange
-    @Bean
-    public TopicExchange userExchange() {
-        return new TopicExchange(USER_EXCHANGE);
-    }
+//    @Bean
+//    public TopicExchange musicEventsExchange() {
+//        return new TopicExchange(MUSIC_EVENT_EXCHANGE);
+//    }
 
     //song liked queue and binding
 //    @Bean
@@ -90,15 +93,15 @@ public class RabbitMQConfig {
 
     //user deleted queue and binding
     @Bean
-    public Queue userQueue() {
-        return new Queue(USER_DELETED_QUEUE);
+    public Queue musicUserDeletedQueue() {
+        return new Queue(MUSIC_USER_DELETED_QUEUE);
     }
 
     @Bean
-    public Binding userBinding(Queue userQueue, TopicExchange userExchange) {
+    public Binding deleteUserBinding(Queue musicUserDeletedQueue, TopicExchange exchange) {
         return BindingBuilder
-                .bind(userQueue)
-                .to(userExchange)
+                .bind(musicUserDeletedQueue)
+                .to(exchange)
                 .with(USER_DELETED_ROUTING_KEY);
     }
 

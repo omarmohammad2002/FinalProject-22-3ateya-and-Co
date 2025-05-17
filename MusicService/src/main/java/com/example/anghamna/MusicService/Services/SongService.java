@@ -2,6 +2,7 @@ package com.example.anghamna.MusicService.Services;
 
 
 //import com.example.anghamna.MusicService.Clients.UserClient;
+import com.example.anghamna.MusicService.Models.Playlist;
 import com.example.anghamna.MusicService.Models.Song;
 
 import com.example.anghamna.MusicService.Repositories.PlaylistRepository;
@@ -10,6 +11,7 @@ import com.example.anghamna.MusicService.observers.SongObserver;
 import com.example.anghamna.MusicService.observers.Subject;
 import com.example.anghamna.MusicService.rabbitmq.MusicProducer;
 import com.example.anghamna.MusicService.rabbitmq.RabbitMQConfig;
+import jakarta.persistence.PreRemove;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import com.example.anghamna.MusicService.observers.Observer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -59,8 +62,11 @@ public class SongService implements Subject {
         return songRepository.save(song);
     }
 
-    public List<Song> getAllSongs() {
-        return songRepository.findAll();
+    public Set<Song> getAllSongs() {
+        List<Song> songs = songRepository.findAll();
+        Set<Song> songs_set = new HashSet<>(songs);
+        return songs_set;
+
     }
 
     @Cacheable(value = "songs",key = "#id")
@@ -69,12 +75,12 @@ public class SongService implements Subject {
     }
 
     @Cacheable(value = "songs",key = "'artist_' + #artistId")
-    public List<Song> getSongsByArtist(UUID artistId) {
+    public Set<Song> getSongsByArtist(UUID artistId) {
         return songRepository.findByArtistId(artistId);
     }
 
     @Cacheable(value = "songs",key = "'genre_' + #genre.toLowerCase()")
-    public List<Song> getSongsByGenre(String genre) {
+    public Set<Song> getSongsByGenre(String genre) {
         return songRepository.findByGenreIgnoreCase(genre);
     }
 
@@ -94,17 +100,27 @@ public class SongService implements Subject {
         });
     }
 
+    @Transactional
+    @PreRemove
     @CacheEvict(value = "songs", key = "#id")
     public boolean deleteSong(UUID id) {
-        if (songRepository.existsById(id)) {
-            songRepository.deleteById(id);
-            playlistService.deleteSongFromAllPlaylists(id);
+        Optional<Song> songOptional = songRepository.findById(id);
+        if (songOptional.isPresent()) {
+            Song song = songOptional.get();
 
-            //notify streaming service that song is deleted
-            //musicProducer.sendSongDeleted(id);
-            //notify observers
+            // Detach song from all playlists (Hibernate-aware)
+            Set<Playlist> playlists = song.getPlaylists();
+            for (Playlist playlist : playlists) {
+                playlistService.deleteSongFromAllPlaylists(song.getId());
+            }
+            // Save all updated playlists
+            playlistService.saveAllPlaylists(playlists);
+
+            // Now delete song safely
+            songRepository.delete(song);
+
+            // Notify
             notifyObservers(id);
-
             return true;
         }
         return false;
@@ -147,25 +163,40 @@ public class SongService implements Subject {
 
     }
 
-    @RabbitListener(queues = RabbitMQConfig.USER_DELETED_QUEUE)
-    public boolean  deleteSongsByArtist(UUID artistId) {
+    @CacheEvict(value = "songs", key = "#artistId")
+    @RabbitListener(queues = RabbitMQConfig.MUSIC_USER_DELETED_QUEUE)
+    @Transactional
+    public void  deleteSongsByArtist(String artistId) {
+        UUID id = UUID.fromString(artistId);
+        Set<Song> songs = songRepository.findByArtistId(id);
 
-//        List<Song> songs = songRepository.findByArtistId(artistId);
-        UUID hardcodedArtistID = UUID.fromString("b35a6f2c-972c-4dd3-876c-45a3a5ce0d1f");
-        List<Song> songs = songRepository.findByArtistId(hardcodedArtistID);
-        if (!songs.isEmpty()) {
-            songRepository.deleteAll(songs);
-            // Notify observers for each deleted song
-            for (Song song : songs) {
-                //notify streaming service that song is deleted
-                musicProducer.sendSongDeleted(song.getId());
-                notifyObservers(song.getId());
+            if (!songs.isEmpty()) {
+                for (Song song : songs) {
+                   // deleteSong(song.getId());
+
+
+                    // Detach song from all playlists (Hibernate-aware)
+                    Set<Playlist> playlists = song.getPlaylists();
+                    for (Playlist playlist : playlists) {
+                        playlistService.deleteSongFromAllPlaylists(song.getId());
+                        if(playlist.getOwnerId().equals(artistId)){
+                            playlistService.deletePlaylist(playlist.getId(), id);
+                        }
+
+                    }
+                    // Save all updated playlists
+                    playlistService.saveAllPlaylists(playlists);
+
+                    // Now delete song safely
+                    songRepository.delete(song);
+
+                    // Notify
+                    notifyObservers(song.getId());
+                }
             }
-            return true;
 
-        }
-        //TODO Add in observer + fix logic order to be before the return true
-        return false;
+
+       // return false;
     }
 
 

@@ -8,12 +8,11 @@ import com.example.anghamna.UserService.Models.Follow;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Repositories.FollowRepository;
 import com.example.anghamna.UserService.Repositories.UserRepository;
-import com.example.anghamna.UserService.Events.EventPublisher;
+import com.example.anghamna.UserService.rabbitmq.EventPublisher;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
 
 

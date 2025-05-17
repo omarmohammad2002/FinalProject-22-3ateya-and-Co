@@ -10,8 +10,6 @@ import java.util.UUID;
 
 public class AddSongCommand  implements  PlaylistCommand{
 
-    //FIXME shouldnt i inject it?
-    //   @Autowired
     private final PlaylistRepository playlistRepository;
     private final SongRepository songRepository;
     private final UUID playlistId;

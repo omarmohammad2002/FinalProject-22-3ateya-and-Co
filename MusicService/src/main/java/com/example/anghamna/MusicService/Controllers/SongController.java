@@ -1,7 +1,9 @@
 package com.example.anghamna.MusicService.Controllers;
 
 
+import com.example.anghamna.MusicService.Models.Playlist;
 import com.example.anghamna.MusicService.Models.Song;
+import com.example.anghamna.MusicService.Services.PlaylistService;
 import com.example.anghamna.MusicService.Services.SongService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -19,6 +23,8 @@ public class SongController {
     @Autowired
     private final SongService songService;
 
+
+
     public SongController(SongService songService) {
         this.songService = songService;
     }
@@ -26,14 +32,17 @@ public class SongController {
 
     // Create a new song
     @PostMapping("/")
-    public ResponseEntity<Song> createSong(@Valid @RequestBody Song song) {
+    public ResponseEntity<Song> createSong(@Valid @RequestBody Song song, @CookieValue("USER_ID") String userIdCookie) {
+        UUID id = UUID.fromString(userIdCookie);
+        song.setArtistId(id);
         Song created = songService.createSong(song);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
+
     }
 
     // Get all songs
     @GetMapping("/")
-    public ResponseEntity<List<Song>> getAllSongs() {
+    public ResponseEntity<Set<Song>> getAllSongs() {
         return ResponseEntity.ok(songService.getAllSongs());
     }
 
@@ -47,46 +56,34 @@ public class SongController {
 
     // Get songs by artist
     @GetMapping("/artist/{artistId}")
-    public ResponseEntity<List<Song>> getSongsByArtist(@PathVariable UUID artistId) {
+    public ResponseEntity<Set<Song>> getSongsByArtist(@PathVariable UUID artistId) {
         return ResponseEntity.ok(songService.getSongsByArtist(artistId));
     }
 
     // Get songs by genre
     @GetMapping("/genre/{genre}")
-    public ResponseEntity<List<Song>> getSongsByGenre(@PathVariable String genre) {
+    public ResponseEntity<Set<Song>> getSongsByGenre(@PathVariable String genre) {
         return ResponseEntity.ok(songService.getSongsByGenre(genre));
     }
 
-//    // Search songs by title (partial match)
-//    @GetMapping("/search")
-//    public ResponseEntity<List<Song>> searchSongsByTitle(@RequestParam("title") String title) {
-//        return ResponseEntity.ok(songService.searchSongsByTitle(title));
-//    }
 
-//    // Get top streamed songs
-//    @GetMapping("/top-streamed")
-//    public ResponseEntity<List<Song>> getTopStreamedSongs(@RequestParam(defaultValue = "10") int limit) {
-//        return ResponseEntity.ok(songService.getTopStreamedSongs(limit));
-//    }
-
-//    // Get a random song (discover mode)
-//    @GetMapping("/random")
-//    public ResponseEntity<Song> getRandomSong() {
-//        return songService.getRandomSong()
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.noContent().build());
+//    @GetMapping("/getPlaylists/{songId}")
+//    public Set<Playlist> getPlaylistsBySongId(@PathVariable UUID songId) {
+//        return songService.getSongById(songId).get().getPlaylists();
 //    }
 
 
-    //FIXME ensure the artist is the user
     @PutMapping("/{id}")
-    public ResponseEntity<Song> updateSong(@PathVariable UUID id, @Valid @RequestBody Song updatedSong) {
-        return songService.updateSong(id, updatedSong)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Song> updateSong(@PathVariable UUID id, @Valid @RequestBody Song updatedSong,
+                                           @CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
+        if(updatedSong.getArtistId().equals(userId)) {
+            songService.updateSong(id, updatedSong);
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body(updatedSong);
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
     }
 
-//FIXME ensure you can only like once as a user
 
     @PutMapping("/{id}/like")
     public ResponseEntity<Song> updateSongLikeCount(@PathVariable UUID id) {
@@ -102,56 +99,33 @@ public class SongController {
        songService.streamedSong(id);
    }
 
-//
-//    @PutMapping("/{id}/name")
-//    public ResponseEntity<Song> updateSongName(@PathVariable UUID id, @RequestParam String name) {
-//        return songService.updateSongName(id, name)
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.notFound().build());
-//    }
-
-
-  //  @PutMapping("/{id}/artist")
-//    public ResponseEntity<Song> updateSongArtist(@PathVariable UUID id, @RequestParam UUID artistId) {
-//        return songService.updateSongArtist(id, artistId)
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.notFound().build());
-//    }
-
-
-//FIXME the respone entities being returned?
-    // Delete song
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSong(@PathVariable UUID id) {
-        if (songService.deleteSong(id)) {
-            return ResponseEntity.noContent().build();
-        } else {
+    @DeleteMapping("/{songId}")
+    public ResponseEntity<Void> deleteSong(@PathVariable UUID songId, @CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
+        Optional<Song> optionalSong = songService.getSongById(songId);
+        if (optionalSong.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        Song song = optionalSong.get();
+        if(song.getArtistId().equals(userId)) {
+            if (songService.deleteSong(songId)) {
+                return ResponseEntity.noContent().build();
+            }
+        }
+        return ResponseEntity.notFound().build();
     }
 
     //Delete song by artist
 
     @DeleteMapping("/artist/{artistId}")
-    public ResponseEntity<Void> deleteSongsByArtist(@PathVariable UUID artistId) {
-        if (songService.deleteSongsByArtist(artistId)) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.notFound().build();
+    public void deleteSongsByArtist(@PathVariable String artistId, @CookieValue("USER_ID") String userIdCookie) {
+        UUID userId = UUID.fromString(userIdCookie);
+        UUID artistIdTransformed = UUID.fromString(artistId);
+        if(artistIdTransformed.equals(userId)) {
+            songService.deleteSongsByArtist(artistId);
         }
+
     }
-
-//    //Delete a specific song + ensure its the user thats the artist
-
-
-//    @DeleteMapping("/artist/{artistId}/song/{songId}")
-//    public ResponseEntity<Void> deleteSongByArtist(@RequestParam UUID artistId, @RequestParam UUID songId) {
-//        if (songService.deleteSongByArtist(artistId, songId)) {
-//            return ResponseEntity.noContent().build();
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
-//    }
 
 }

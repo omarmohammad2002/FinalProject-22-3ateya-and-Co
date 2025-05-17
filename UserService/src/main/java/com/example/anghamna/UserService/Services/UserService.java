@@ -1,11 +1,13 @@
 package com.example.anghamna.UserService.Services;
 import com.example.anghamna.UserService.DTOs.RegisterRequest;
-import com.example.anghamna.UserService.Events.EventPublisher;
+import com.example.anghamna.UserService.rabbitmq.EventPublisher;
 import com.example.anghamna.UserService.Models.User;
 import com.example.anghamna.UserService.Models.UserType;
 import com.example.anghamna.UserService.Repositories.FollowRepository;
 import com.example.anghamna.UserService.Repositories.UserRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -23,6 +25,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final FollowRepository followRepository;
     private EventPublisher eventPublisher;
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
 
     @Autowired
@@ -129,9 +132,10 @@ public class UserService {
 
         followRepository.deleteByFollowerId(id);
         followRepository.deleteByFollowedId(id);
+        eventPublisher.publishUserDeletedEvent(id);
+        logger.info("🎧 User deleted sent for userID: {}", id);
 
         userRepository.delete(user);
-//        eventPublisher.publishUserDeletedEvent(id);
     }
 
     public String getUserType(UUID id) {
