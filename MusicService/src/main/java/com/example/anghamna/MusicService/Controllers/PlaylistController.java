@@ -1,33 +1,26 @@
 package com.example.anghamna.MusicService.Controllers;
 
-//import com.spotify.music.dto.PlaylistRequest;
-//import com.spotify.music.dto.PlaylistResponse;
+
 import com.example.anghamna.MusicService.Models.Playlist;
 import com.example.anghamna.MusicService.Models.Song;
 import com.example.anghamna.MusicService.Repositories.PlaylistRepository;
 import com.example.anghamna.MusicService.Repositories.SongRepository;
 import com.example.anghamna.MusicService.Services.PlaylistService;
 import com.example.anghamna.MusicService.command.AddSongCommand;
-import com.example.anghamna.MusicService.command.PlaylistCommand;
 import com.example.anghamna.MusicService.command.RemoveSongCommand;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/playlists")
-//@RequiredArgsConstructor
 public class PlaylistController {
 
-    @Autowired //we added those 2 for command pattern to add/remove song
+    @Autowired
     private PlaylistRepository playlistRepository;
 
     @Autowired
@@ -50,26 +43,20 @@ public class PlaylistController {
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    //FIXME REVISE
-    // Get Playlist by ID
     @GetMapping("/{id}")
     public ResponseEntity<Playlist> getPlaylistById(@PathVariable UUID id, @CookieValue("USER_ID") String userIdCookie) {
         UUID userId = UUID.fromString(userIdCookie);
         Playlist playlist = playlistRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found"));
-        boolean isPrivate = playlist.isPrivate();
-        UUID ownerId = playlist.getOwnerId();
-        if(isPrivate ){
-            if(ownerId.equals(userId)){
-                Playlist result = playlistService.getPlaylistById(id)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found in service"));
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body(result);
-            }
+
+        if (playlist.isPrivate() && !playlist.getOwnerId().equals(userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+
         Playlist result = playlistService.getPlaylistById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found in service"));
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body(result);
+
+        return ResponseEntity.ok(result);
     }
 
 
@@ -90,21 +77,16 @@ public class PlaylistController {
         return ResponseEntity.ok(playlistService.getPublicPlaylists());
     }
 
-    //FIXME REVISE
     @GetMapping("/playlistSongs/{playlistId}")
     public ResponseEntity<Set<Song>> getPlaylistSongs(@PathVariable UUID playlistId, @CookieValue("USER_ID") String userIdCookie) {
         UUID userId = UUID.fromString(userIdCookie);
         Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found"));
-        boolean isPrivate = playlist.isPrivate();
-        UUID ownerId = playlist.getOwnerId();
-        if(isPrivate){
-            if(ownerId.equals(userId)){
-                return ResponseEntity.ok(playlistService.getPlaylistSongs(playlistId));
-            }
+        if (playlist.isPrivate() && !playlist.getOwnerId().equals(userId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        return ResponseEntity.ok(playlistService.getPlaylistSongs(playlistId));
+        Set<Song> songs = playlistService.getPlaylistSongs(playlistId);
+        return ResponseEntity.ok(songs);
     }
 
 
@@ -133,7 +115,7 @@ public class PlaylistController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
     }
 
-    @PatchMapping("privacy/{playlistId}")
+    @PatchMapping("/privacy/{playlistId}")
     public void togglePrivacy(@PathVariable UUID playlistId, @CookieValue("USER_ID") String userIdCookie) {
         UUID userId = UUID.fromString(userIdCookie);
         Playlist playlist = playlistRepository.findById(playlistId)

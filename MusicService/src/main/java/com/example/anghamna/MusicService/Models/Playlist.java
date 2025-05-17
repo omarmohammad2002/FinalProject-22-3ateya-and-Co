@@ -1,46 +1,32 @@
 
 package com.example.anghamna.MusicService.Models;
 
-import com.example.anghamna.MusicService.Models.Song;
-import com.example.anghamna.MusicService.Repositories.SongRepository;
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
 @Table(name = "playlists")
 public class Playlist {
 
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(columnDefinition = "UUID DEFAULT gen_random_uuid()")
     private UUID id;
 
-//    @Column(nullable = false)
     private String name;
 
-//    @Column(name = "owner_id", nullable = false)
     private UUID ownerId;
 
-//    @Column(name = "is_private")
     private boolean isPrivate = true;
 
     @CreationTimestamp
-//    @Column(name = "created_at")
     private Date createdAt;
 
     @UpdateTimestamp
-//    @Column(name = "updated_at")
     private Date updatedAt;
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
@@ -60,7 +46,6 @@ public class Playlist {
         this.name = name;
         this.isPrivate = isPrivate;
         this.createdAt = Date.from(Instant.now());
-//        this.songs = new ArrayList<Song>();
         this.all_songs.add(song);
         this.updatedAt = Date.from(Instant.now());
 
@@ -78,16 +63,6 @@ public class Playlist {
     }
 
 
-
-//    public Playlist(String name, UUID ownerId, boolean isPrivate) {
-//        this.name = name;
-//        this.ownerId = ownerId;
-//        this.isPrivate = isPrivate;
-//        this.createdAt = Date.from(Instant.now());
-//        this.updatedAt = Date.from(Instant.now());
-//        this.songs = new ArrayList<Song>();
-//
-//    }
 
     // Getters and Setters
     public UUID getId() {

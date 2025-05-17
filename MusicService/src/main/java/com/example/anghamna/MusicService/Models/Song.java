@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -20,7 +18,6 @@ public class Song {
 
     private String title;
 
-//    @Column(name = "artist_id", nullable = false)
     private UUID artistId;
 
     private String genre;
@@ -28,11 +25,9 @@ public class Song {
     private int duration; // in seconds
 
     @CreationTimestamp
-//    @Column(name = "created_at", updatable = false)
     private Date createdAt;
 
     @UpdateTimestamp
-//    @Column(name = "updated_at")
     private Date updatedAt;
 
     private int likeCount = 0;
@@ -44,12 +39,6 @@ public class Song {
     @ManyToMany(mappedBy = "all_songs", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private Set<Playlist> playlists = new HashSet<>();
 
-
-    // when they call upload song we call on both create song in both services?
-    // or should this service send it to sttreaming and pass the strong id when we create it
-// we need to add the songURL field to the constructor and getters/setters
-    //Instant now = Instant.now();
-    //        created_at = Date.from(now);
     
     // Constructors
     public Song() {}

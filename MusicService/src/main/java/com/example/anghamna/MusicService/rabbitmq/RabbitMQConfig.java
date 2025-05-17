@@ -24,10 +24,6 @@ public class RabbitMQConfig {
     public static final String USER_DELETED_ROUTING_KEY = "user.deleted";
 
 
-    //song liked
-//    public static final String SONG_LIKED_QUEUE = "song_liked_queue";
-//    public static final String SONG_LIKED_ROUTING_KEY = "song_liked_routing";
-
     //song streamed
     public static final String SONG_STREAMED_QUEUE = "stream_played_queue";
     public static final String SONG_STREAMED_ROUTING_KEY = "stream.played";
@@ -37,33 +33,11 @@ public class RabbitMQConfig {
     public static final String SONG_DELETED_ROUTING_KEY = "song.deleted";
 
 
-
     //exchange with streaming
     @Bean
     public TopicExchange exchange() {
         return new TopicExchange(EXCHANGE);
     }
-
-    //user exchange
-//    @Bean
-//    public TopicExchange musicEventsExchange() {
-//        return new TopicExchange(MUSIC_EVENT_EXCHANGE);
-//    }
-
-    //song liked queue and binding
-//    @Bean
-//    public Queue likeQueue() {
-//        return new Queue(SONG_LIKED_QUEUE);
-//    }
-//
-//    @Bean
-//    public Binding likeBinding(Queue likeQueue, TopicExchange exchange) {
-//        return BindingBuilder
-//                .bind(likeQueue)
-//                .to(exchange)
-//                .with(SONG_LIKED_ROUTING_KEY);
-//    }
-
 
     //song streamed queue and binding
     @Bean
