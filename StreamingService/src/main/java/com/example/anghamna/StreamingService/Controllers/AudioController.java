@@ -33,6 +33,16 @@ public class AudioController {
         return audioService.getAllAudio();
     }
 
+    @GetMapping("/stream/{songId}")
+    public ResponseEntity<InputStreamResource> streamAudio(
+            @PathVariable UUID songId,
+            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader,
+            @CookieValue("USER_ID") String userIdCookie) throws Exception {
+
+        UUID userID = UUID.fromString(userIdCookie);
+        return audioService.streamAudioController(songId, rangeHeader, userID);
+    }
+
     @PostMapping("/upload")
     public ResponseEntity<Audio> uploadAudio(@RequestParam("songId") UUID songId,
                                            @RequestParam("file") MultipartFile file) throws IOException {
@@ -44,17 +54,4 @@ public class AudioController {
     public String deleteAudio(@PathVariable UUID songId) throws IOException {
         return audioService.deleteAudio(songId);
     }
-
-
-    @GetMapping("/stream/{songId}")
-    public ResponseEntity<InputStreamResource> streamAudio(
-            @PathVariable UUID songId,
-            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader,
-            @CookieValue("USER_ID") String userIdCookie) throws Exception {
-
-        UUID userID = UUID.fromString(userIdCookie);
-        return audioService.streamAudioController(songId, rangeHeader, userID);
-    }
-
-
 }
