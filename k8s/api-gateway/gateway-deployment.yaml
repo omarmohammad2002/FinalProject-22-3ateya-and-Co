@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: apigateway-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: apigateway-service
+  template:
+    metadata:
+      labels:
+        app: apigateway-service
+    spec:
+      containers:
+        - name: apigateway-service
+          image: faridamousa/apigateway-service:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: k8s
+            - name: SPRING_MAIN_WEB_APPLICATION_TYPE
+              value: reactive
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_0_ID
+              value: user-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_0_URI
+              value: http://user-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0
+              value: Path=/userapi/**
+
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_1_ID
+              value: music-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_1_URI
+              value: http://music-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0
+              value: Path=/songs/**
+
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_2_ID
+              value: music-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_2_URI
+              value: http://music-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0
+              value: Path=/playlists/**
+
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_3_ID
+              value: socialmedia-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_3_URI
+              value: http://socialmedia-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0
+              value: Path=/socialmedia/**
+
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_4_ID
+              value: streaming-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_4_URI
+              value: http://streaming-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0
+              value: Path=/streaming/**

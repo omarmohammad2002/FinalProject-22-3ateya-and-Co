@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: socialmedia-mongo-persistent-volume
+spec:
+  accessModes:
+    - ReadWriteOnce        #FIXME CHANGE
+  resources:
+    requests:
+      storage: 1Gi         #FIXME CHANGE
