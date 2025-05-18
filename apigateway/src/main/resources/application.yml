@@ -23,10 +23,26 @@ spring:
           predicates:
             - Path=/playlists/**
 
-#        - id: socialmedia-service
-#          uri: http://socialmedia-service:8080
-#          predicates:
-#            - Path=/socialmedia/**
+        - id: socialmedia-service
+          uri: http://socialmedia-service:8080
+          predicates:
+            - Path=/comments/**
+
+        - id: socialmedia-service
+          uri: http://socialmedia-service:8080
+          predicates:
+            - Path=/feeds/**
+
+        - id: socialmedia-service
+          uri: http://socialmedia-service:8080
+          predicates:
+            - Path=/likes/**
+
+        - id: socialmedia-service
+          uri: http://socialmedia-service:8080
+          predicates:
+            - Path=/posts/**
+
         - id: streaming-service
           uri: http://streaming-service:8080
           predicates:
