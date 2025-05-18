@@ -18,18 +18,15 @@ public class RedisCacheConfig {
 
     @Bean
     public RedisCacheManager cacheManager(RedisConnectionFactory redisConnectionFactory) {
-        // Default cache configuration
         RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
-                .entryTtl(Duration.ofSeconds(90)) // Default TTL for all caches
+                .entryTtl(Duration.ofSeconds(90))
                 .disableCachingNullValues()
                 .serializeValuesWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(
                                 new Jackson2JsonRedisSerializer<>(Object.class)));
 
-        // Custom configurations for different entities
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
 
-        // Cache configuration for Students
         cacheConfigurations.put("audio",
                 defaultConfig.serializeValuesWith(
                         RedisSerializationContext.SerializationPair.fromSerializer(
@@ -37,8 +34,8 @@ public class RedisCacheConfig {
 
 
         return RedisCacheManager.builder(redisConnectionFactory)
-                .cacheDefaults(defaultConfig) // Default settings
-                .withInitialCacheConfigurations(cacheConfigurations) // Custom per-cache configurations
+                .cacheDefaults(defaultConfig)
+                .withInitialCacheConfigurations(cacheConfigurations)
                 .build();
     }
 }
