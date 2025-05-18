@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: streaming-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: streaming-service

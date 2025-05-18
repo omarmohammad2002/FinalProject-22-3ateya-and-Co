@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: music-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: music-service
@@ -21,7 +21,7 @@ spec:
             - name: SPRING_PROFILES_ACTIVE
               value: k8s
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://music-postgres-0.music-postgres:5432/customer_db
+              value: jdbc:postgresql://music-postgres-0.music-service:5432/music
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:

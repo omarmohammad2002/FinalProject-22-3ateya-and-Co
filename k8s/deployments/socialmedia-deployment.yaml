@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: socialmedia-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: socialmedia-service
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: socialmedia-service
-          image: faridamousa/socialmedia-service
+          image: faridamousa/socialmedia-service:latest
           ports:
             - containerPort: 8083
           env:

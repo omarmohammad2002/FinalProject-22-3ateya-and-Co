@@ -35,11 +35,11 @@ spec:
                   name: music-postgres-secret
                   key: POSTGRES_PASSWORD
           volumeMounts:
-            - name: music_postgres-persistent-storage
+            - name: music-postgres-persistent-storage
               mountPath: /var/lib/postgresql/data
   volumeClaimTemplates:
     - metadata:
-        name: music_postgres-persistent-storage
+        name: music-postgres-persistent-storage
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:
