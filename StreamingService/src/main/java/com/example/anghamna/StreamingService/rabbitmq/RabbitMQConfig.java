@@ -10,15 +10,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    // Add Song
     public static final String SONG_ADDED_QUEUE = "song_added_queue";
     public static final String SONG_ADDED_ROUTING = "song.added";
 
-    // Delete Song
     public static final String SONG_DELETED_QUEUE = "song_deleted_queue";
     public static final String SONG_DELETED_ROUTING = "song.deleted";
 
-    // Stream Played
     public static final String STREAM_PLAYED_QUEUE = "stream_played_queue";
     public static final String STREAM_PLAYED_ROUTING = "stream.played";
 
