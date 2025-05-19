@@ -16,8 +16,10 @@ spec:
         - name: streaming-service
           image: faridamousa/streaming-service
           ports:
-            - containerPort: 8083
+            - containerPort: 8080
           env:
+            - name: user-service
+              value: http://user-service:8080
             - name: SPRING_PROFILES_ACTIVE
               value: k8s
             - name: SPRING_DATA_MONGODB_URI
@@ -42,6 +44,6 @@ spec:
                   name: rabbitmq-secret
                   key: RABBITMQ_DEFAULT_PASS
             - name: SPRING_REDIS_HOST
-              value: redis_cache
+              value: redis
             - name: SPRING_REDIS_PORT
               value: "6379"
