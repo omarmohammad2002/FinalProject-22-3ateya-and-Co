@@ -20,7 +20,7 @@
       <module name="SocialMediaService" options="-parameters" />
       <module name="StreamingService" options="-parameters" />
       <module name="UserService" options="-parameters" />
-      <module name="apigateway" options="" />
+      <module name="apigateway" options="-parameters" />
     </option>
   </component>
 </project>
