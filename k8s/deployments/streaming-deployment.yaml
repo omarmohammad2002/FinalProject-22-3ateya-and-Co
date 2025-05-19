@@ -19,7 +19,7 @@ spec:
 
       initContainers:
         - name: copy-ad-file
-          image: habibahilal/streaming-service
+          image: faridamousa/streaming-service
           command:
             - cp
             - /app/static-media/f47ac10b-01cc-4372-a567-0e02b2c3d479
