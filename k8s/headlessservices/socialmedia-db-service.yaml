@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: socialmedia-mongo
+  labels:
+    app: socialmedia-mongo
+spec:
+  ports:
+    - port: 27017
+      targetPort: 27017
+  clusterIP: None  # Headless service
+  selector:
+    app: socialmedia-mongo

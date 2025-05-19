@@ -1,7 +1,7 @@
 FROM openjdk:25-ea-4-jdk-oraclelinux9
 
 WORKDIR /app
-
+EXPOSE 8080
 # Create media directory and set permissions
 RUN mkdir -p /app/media && chmod 777 /app/media
 

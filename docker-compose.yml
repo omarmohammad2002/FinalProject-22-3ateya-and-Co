@@ -51,8 +51,8 @@ services:
       RABBITMQ_DEFAULT_PASS: guest
     restart: always
 
-  # MongoDB
-  mongo:
+  # MongoDB for streaming
+  mongo_streaming:
     image: mongo
     container_name: mongo_streaming
     environment:
@@ -64,7 +64,7 @@ services:
     restart: always
 
   # Mongo Express
-  mongo-express:
+  mongo-express_streaming:
     image: mongo-express
     container_name: mongo_express_streaming
     ports:
@@ -77,7 +77,36 @@ services:
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: pass
     depends_on:
-      - mongo
+      - mongo_streaming
+    restart: always
+
+  # MongoDB for social media
+  mongo_socialmedia:
+    image: mongo
+    container_name: mongo_socialmedia
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+      MONGO_INITDB_DATABASE: socialmedia
+    ports:
+      - "27018:27017"
+    restart: always
+
+  # Mongo Express for social media
+  mongo-express_socialmedia:
+    image: mongo-express
+    container_name: mongo_express_socialmedia
+    ports:
+      - "9001:8083"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: pass
+    depends_on:
+      - mongo_socialmedia
     restart: always
 
   # User Service
@@ -129,11 +158,11 @@ services:
     ports:
       - "8083:8080"
     depends_on:
-      - mongo
+      - mongo_socialmedia
       - redis_cache
       - rabbitmq
     environment:
-      - spring.data.mongodb.uri=mongodb://root:example@mongo:27017/socialmedia?authSource=admin
+      - spring.data.mongodb.uri=mongodb://root:example@mongo_socialmedia:27017/socialmedia?authSource=admin
       - spring.data.mongodb.database=socialmedia
     restart: always
 
@@ -146,12 +175,13 @@ services:
     ports:
       - "8084:8080"
     depends_on:
-      - mongo
+      - mongo_streaming
       - rabbitmq
+      - redis_cache
     volumes:
       - ./StreamingService/media:/app/media
     environment:
-      - spring.data.mongodb.uri=mongodb://root:example@mongo:27017/3ateya_and_Co?authSource=admin
+      - spring.data.mongodb.uri=mongodb://root:example@mongo_streaming:27017/3ateya_and_Co?authSource=admin
       - spring.data.mongodb.database=3ateya_and_Co
     restart: always
 
@@ -169,4 +199,3 @@ services:
       - streaming-service
       - socialmedia-service
     restart: always
-

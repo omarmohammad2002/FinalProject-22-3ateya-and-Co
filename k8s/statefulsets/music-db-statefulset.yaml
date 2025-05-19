@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: music-postgres
+spec:
+  serviceName: "music-postgres"
+  replicas: 1           #FIXME CHANGE
+  selector:
+    matchLabels:
+      app: music-postgres
+  template:
+    metadata:
+      labels:
+        app: music-postgres
+    spec:
+      containers:
+        - name: music-postgres
+          image: postgres
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              valueFrom:
+                secretKeyRef:
+                  name: music-postgres-secret
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: music-postgres-secret
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: music-postgres-secret
+                  key: POSTGRES_PASSWORD
+          volumeMounts:
+            - name: music-postgres-persistent-storage
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: music-postgres-persistent-storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi  #FIXME CHANGE
