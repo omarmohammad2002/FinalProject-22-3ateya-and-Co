@@ -86,14 +86,14 @@ public class UserService {
             existingUser.setEmail(registerRequest.getEmail());
         }
 
-        UserType userType;
-        try {
-            userType = UserType.valueOf(registerRequest.getUser_type().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Invalid user type");
-        }
 
         if (registerRequest.getUser_type() != null) {
+            UserType userType;
+            try {
+                userType = UserType.valueOf(registerRequest.getUser_type().toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Invalid user type");
+            }
             existingUser.setUser_type(userType);
         }
 
