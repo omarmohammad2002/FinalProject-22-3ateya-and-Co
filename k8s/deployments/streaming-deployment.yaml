@@ -1,3 +1,132 @@
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: streaming-service
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: streaming-service
+#  template:
+#    metadata:
+#      labels:
+#        app: streaming-service
+#    spec:
+#      containers:
+#        - name: streaming-service
+#          image: habibahilal/streaming-service
+#          ports:
+#            - containerPort: 8080
+#          env:
+#            - name: user-service
+#              value: http://user-service:8080
+#            - name: SPRING_PROFILES_ACTIVE
+#              value: k8s
+#            - name: SPRING_DATA_MONGODB_URI
+#              valueFrom:
+#                secretKeyRef:
+#                  name: streaming-mongo-secret
+#                  key: URI
+#            - name: SPRING_DATA_MONGODB_DATABASE
+#              value: 3ateya_and_Co
+#            - name: SPRING_RABBITMQ_HOST
+#              value: rabbitmq
+#            - name: SPRING_RABBITMQ_PORT
+#              value: "5672"
+#            - name: SPRING_RABBITMQ_USERNAME
+#              valueFrom:
+#                secretKeyRef:
+#                  name: rabbitmq-secret
+#                  key: RABBITMQ_DEFAULT_USER
+#            - name: SPRING_RABBITMQ_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  name: rabbitmq-secret
+#                  key: RABBITMQ_DEFAULT_PASS
+#            - name: SPRING_DATA_REDIS_HOST
+#              value: redis
+#            - name: SPRING_DATA_REDIS_PORT
+#              value: "6379"
+#          volumeMounts:
+#              - name: media-volume
+#                mountPath: /app/media
+#      volumes:
+#        - name: media-volume
+#          emptyDir: {}
+
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: streaming-service
+#spec:
+#  replicas: 1
+#  selector:
+#    matchLabels:
+#      app: streaming-service
+#  template:
+#    metadata:
+#      labels:
+#        app: streaming-service
+#    spec:
+#      # Define the media volume from the PVC
+#      volumes:
+#        - name: media-volume
+#          persistentVolumeClaim:
+#            claimName: media-pvc
+#
+#      # Init container to copy static ad file from image to mounted PVC
+#      initContainers:
+#        - name: copy-ad-file
+#          image: habibahilal/streaming-service
+#          command:
+#            - sh
+#            - -c
+#            - |
+#              echo "Copying ad file to mounted volume...";
+#              cp -n /app/static-media/* /app/media/
+#          volumeMounts:
+#            - name: media-volume
+#              mountPath: /app/media
+#
+#      containers:
+#        - name: streaming-service
+#          image: habibahilal/streaming-service
+#          ports:
+#            - containerPort: 8080
+#          env:
+#            - name: user-service
+#              value: http://user-service:8080
+#            - name: SPRING_PROFILES_ACTIVE
+#              value: k8s
+#            - name: SPRING_DATA_MONGODB_URI
+#              valueFrom:
+#                secretKeyRef:
+#                  name: streaming-mongo-secret
+#                  key: URI
+#            - name: SPRING_DATA_MONGODB_DATABASE
+#              value: 3ateya_and_Co
+#            - name: SPRING_RABBITMQ_HOST
+#              value: rabbitmq
+#            - name: SPRING_RABBITMQ_PORT
+#              value: "5672"
+#            - name: SPRING_RABBITMQ_USERNAME
+#              valueFrom:
+#                secretKeyRef:
+#                  name: rabbitmq-secret
+#                  key: RABBITMQ_DEFAULT_USER
+#            - name: SPRING_RABBITMQ_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  name: rabbitmq-secret
+#                  key: RABBITMQ_DEFAULT_PASS
+#            - name: SPRING_DATA_REDIS_HOST
+#              value: redis
+#            - name: SPRING_DATA_REDIS_PORT
+#              value: "6379"
+#          volumeMounts:
+#            - name: media-volume
+#              mountPath: /app/media
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -12,9 +141,25 @@ spec:
       labels:
         app: streaming-service
     spec:
+      volumes:
+        - name: media-volume
+          persistentVolumeClaim:
+            claimName: media-pvc
+
+      initContainers:
+        - name: copy-ad-file
+          image: habibahilal/streaming-service
+          command:
+            - cp
+            - /app/static-media/f47ac10b-01cc-4372-a567-0e02b2c3d479
+            - /app/media/f47ac10b-01cc-4372-a567-0e02b2c3d479
+          volumeMounts:
+            - name: media-volume
+              mountPath: /app/media
+
       containers:
         - name: streaming-service
-          image: faridamousa/streaming-service
+          image: habibahilal/streaming-service
           ports:
             - containerPort: 8080
           env:
@@ -47,3 +192,6 @@ spec:
               value: redis
             - name: SPRING_DATA_REDIS_PORT
               value: "6379"
+          volumeMounts:
+            - name: media-volume
+              mountPath: /app/media
