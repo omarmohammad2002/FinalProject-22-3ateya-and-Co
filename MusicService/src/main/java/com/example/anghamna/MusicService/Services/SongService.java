@@ -128,23 +128,23 @@ public class SongService implements Subject {
     public void  deleteSongsByArtist(String artistId) {
         UUID id = UUID.fromString(artistId);
         Set<Song> songs = songRepository.findByArtistId(id);
-            if (!songs.isEmpty()) {
-                for (Song song : songs) {
-                    Set<Playlist> playlists = song.getPlaylists();
-                    for (Playlist playlist : playlists) {
-                        playlistService.deleteSongFromAllPlaylists(song.getId());
-                        if(playlist.getOwnerId().equals(artistId)){
-                            playlistService.deletePlaylist(playlist.getId(), id);
-                        }
+        if (!songs.isEmpty()) {
+            for (Song song : songs) {
+                Set<Playlist> playlists = song.getPlaylists();
+                for (Playlist playlist : playlists) {
+                    playlistService.deleteSongFromAllPlaylists(song.getId());
+                    if(playlist.getOwnerId().equals(artistId)){
+                        playlistService.deletePlaylist(playlist.getId(), id);
                     }
-
-                    playlistService.saveAllPlaylists(playlists);
-
-                    songRepository.delete(song);
-
-                    notifyObservers(song.getId());
                 }
+
+                playlistService.saveAllPlaylists(playlists);
+
+                songRepository.delete(song);
+
+                notifyObservers(song.getId());
             }
+        }
     }
 
     @Override

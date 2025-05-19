@@ -83,10 +83,10 @@ public class SongController {
         }
     }
 
-   @PutMapping("/{id}/stream")
-   public void updateSongStreamCount(@PathVariable String id) {
-       songService.streamedSong(id);
-   }
+    @PutMapping("/{id}/stream")
+    public void updateSongStreamCount(@PathVariable String id) {
+        songService.streamedSong(id);
+    }
 
     @DeleteMapping("/{songId}")
     public ResponseEntity<Void> deleteSong(@PathVariable UUID songId, @CookieValue("USER_ID") String userIdCookie) {

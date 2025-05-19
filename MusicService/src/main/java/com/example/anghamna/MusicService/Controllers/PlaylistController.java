@@ -40,7 +40,7 @@ public class PlaylistController {
         UUID userId = UUID.fromString(userIdCookie);
         playlist.setOwnerId(userId);
         Playlist created = playlistService.createPlaylist(playlist);
-            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping("/{id}")
@@ -105,14 +105,14 @@ public class PlaylistController {
 
     @DeleteMapping("/{playlistId}")
     public ResponseEntity<Void> deletePlaylist(@PathVariable UUID playlistId, @CookieValue("USER_ID") String userIdCookie) {
-            UUID userId = UUID.fromString(userIdCookie);
-            Playlist playlist = playlistRepository.findById(playlistId)
+        UUID userId = UUID.fromString(userIdCookie);
+        Playlist playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Playlist not found"));
-            if(playlist.getOwnerId().equals(userId)){
-                playlistService.deletePlaylist(playlistId, userId);
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+        if(playlist.getOwnerId().equals(userId)){
+            playlistService.deletePlaylist(playlistId, userId);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
     }
 
     @PatchMapping("/privacy/{playlistId}")

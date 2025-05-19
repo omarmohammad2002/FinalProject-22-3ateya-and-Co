@@ -73,7 +73,7 @@ public class PlaylistService {
 
     // return all public playlists
     public Set<Playlist> getPublicPlaylists() {
-       return playlistRepository.findByIsPrivate(false);
+        return playlistRepository.findByIsPrivate(false);
     }
 
 
@@ -89,7 +89,7 @@ public class PlaylistService {
     @CachePut(value="playlists",key="#result.id")
     public Optional<Playlist> updatePlaylist(UUID playlistId, Playlist playlist) {
 
-    return playlistRepository.findById(playlistId)
+        return playlistRepository.findById(playlistId)
                 .map(existingPlaylist -> {
                     existingPlaylist.setName(playlist.getName());
                     existingPlaylist.setPrivate(playlist.isPrivate());
@@ -120,7 +120,7 @@ public class PlaylistService {
     }
 
     public void addSong(AddSongCommand command) {
-            command.execute();
+        command.execute();
 
     }
 
