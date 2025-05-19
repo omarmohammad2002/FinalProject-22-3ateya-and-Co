@@ -5,6 +5,7 @@ import com.example.anghamna.SocialMediaService.Models.Post;
 import com.example.anghamna.SocialMediaService.Repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +24,7 @@ public class PostService {
     private UserClient userClient;
 
     /** Create a post (Evict caches to refresh data) */
-    @CacheEvict(value = {"publicPosts", "userPosts", "newsFeed"}, allEntries = true)
+    //@CacheEvict(value = "posts", key = "#userId")
     public Post createPost(UUID userId, String content, String visibility) {
         Post post = new Post.Builder()
                 .userId(userId)
@@ -34,7 +35,7 @@ public class PostService {
     }
 
     /** Get news feed for a user (cached by userId) */
-    //@Cacheable(value = "newsFeed", key = "#userId")
+    @Cacheable(value = "posts", key = "#userId")
     public List<Post> getNewsFeedForUser(UUID userId) {
         try {
 
@@ -58,18 +59,20 @@ public class PostService {
 
 
     /** Get all public posts */
+    @Cacheable(value = "public")
     public List<Post> getAllPublicPosts() {
         System.out.println("service");
         return postRepository.findByVisibility("public");
     }
 
-    /** Get posts by a specific user */
+    @Cacheable(value = "posts", key = "#userId")
+    /* Get posts by a specific user */
     public List<Post> getPostsByUser(UUID userId) {
         return postRepository.findByUserId(userId);
     }
 
     /** Update a post only if the user owns it */
-    @CacheEvict(value = {"publicPosts", "userPosts", "newsFeed"}, allEntries = true)
+    @CachePut(value = {"publicPosts", "userPosts", "newsFeed"})
     public Post updatePost(String postId, UUID userId, String content, String visibility) {
         Optional<Post> optionalPost = postRepository.findById(postId)
                 .filter(post -> post.getUserId().equals(userId));
@@ -86,7 +89,7 @@ public class PostService {
     }
 
     /** Delete a post only if the user owns it */
-    @CacheEvict(value = {"publicPosts", "userPosts", "newsFeed"}, allEntries = true)
+    @CacheEvict(value = {"posts", "public"}, allEntries = true)
     public void deletePost(String postId, UUID userId) {
         Optional<Post> optionalPost = postRepository.findById(postId)
                 .filter(post -> post.getUserId().equals(userId));
@@ -96,5 +99,5 @@ public class PostService {
         }
 
         postRepository.deleteById(postId);
-    }
+}
 }

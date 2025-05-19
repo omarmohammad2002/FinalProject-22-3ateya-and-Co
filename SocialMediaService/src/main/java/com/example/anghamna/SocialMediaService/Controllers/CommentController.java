@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,6 +33,11 @@ public class CommentController {
         return comment.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @GetMapping("/post/{postId}")
+    public ResponseEntity<List<Comment>> getCommentsByPost(@PathVariable String postId) {
+        List<Comment> comments = commentService.getCommentsByPost(postId);
+        return ResponseEntity.ok(comments);
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<Comment> editComment(@PathVariable String id,
@@ -50,4 +56,5 @@ public class CommentController {
         boolean deleted = commentService.deleteComment(id, userId);
         return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
+
 }

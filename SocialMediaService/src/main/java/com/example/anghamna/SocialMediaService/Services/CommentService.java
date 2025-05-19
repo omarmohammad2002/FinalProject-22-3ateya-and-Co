@@ -5,8 +5,13 @@ import com.example.anghamna.SocialMediaService.Models.Post;
 import com.example.anghamna.SocialMediaService.Repositories.CommentRepository;
 import com.example.anghamna.SocialMediaService.Repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -42,11 +47,16 @@ public class CommentService {
     }
 
     /** Retrieve a comment by its ID */
+    @Cacheable(value = "commentsById", key = "#id")
     public Optional<Comment> getCommentById(String id) {
         return commentRepository.findById(id);
     }
 
     /** Edit a comment only if user owns it and post exists */
+    @Caching(
+            put = @CachePut(value = "commentsById", key = "#id"),
+            evict = @CacheEvict(value = "commentsByPost", allEntries = true)
+    )
     public Optional<Comment> editComment(String id, String newText, UUID userId) {
         Optional<Comment> optionalComment = commentRepository.findById(id)
                 .filter(comment -> comment.getUserId().equals(userId));
@@ -67,6 +77,10 @@ public class CommentService {
     }
 
     /** Delete a comment only if user owns it and post exists */
+    @Caching(evict = {
+            @CacheEvict(value = "commentsById", key = "#id"),
+            @CacheEvict(value = "commentsByPost", allEntries = true)
+    })
     public boolean deleteComment(String id, UUID userId) {
         Optional<Comment> commentToDelete = commentRepository.findById(id)
                 .filter(comment -> comment.getUserId().equals(userId));
@@ -90,4 +104,9 @@ public class CommentService {
         }
         return false;
     }
+    @Cacheable(value = "commentsByPost", key = "#postId")
+    public List<Comment> getCommentsByPost(String postId) {
+        return commentRepository.findByPostId(postId);
+    }
+
 }
