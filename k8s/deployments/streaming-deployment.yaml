@@ -30,7 +30,7 @@ spec:
 
       containers:
         - name: streaming-service
-          image: habibahilal/streaming-service
+          image: faridamousa/streaming-service
           ports:
             - containerPort: 8080
           env:
