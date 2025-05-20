@@ -96,7 +96,10 @@ public class AudioService {
     }
 
 
-
-
+    public ResponseEntity<InputStreamResource> streamAudioController2(UUID songId, String rangeHeader) throws Exception {
+        String userType = "premium" ;
+        AudioStreamingCommand command = streamingCommandInvoker.getCommand(userType);
+        return command.execute(songId, rangeHeader);
+    }
 }
 

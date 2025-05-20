@@ -43,6 +43,13 @@ public class AudioController {
         return audioService.streamAudioController(songId, rangeHeader, userID);
     }
 
+    @GetMapping("/stream2/{songId}")
+    public ResponseEntity<InputStreamResource> streamAudio2(
+            @PathVariable UUID songId,
+            @RequestHeader(value = HttpHeaders.RANGE, required = false) String rangeHeader) throws Exception {
+        return audioService.streamAudioController2(songId, rangeHeader);
+    }
+
     @PostMapping("/upload")
     public ResponseEntity<Audio> uploadAudio(@RequestParam("songId") UUID songId,
                                            @RequestParam("file") MultipartFile file) throws IOException {
