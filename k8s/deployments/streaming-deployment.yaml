@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: streaming-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: streaming-service
@@ -12,12 +12,30 @@ spec:
       labels:
         app: streaming-service
     spec:
+      volumes:
+        - name: media-volume
+          persistentVolumeClaim:
+            claimName: media-pvc
+
+      initContainers:
+        - name: copy-ad-file
+          image: faridamousa/streaming-service
+          command:
+            - cp
+            - /app/static-media/f47ac10b-01cc-4372-a567-0e02b2c3d479
+            - /app/media/f47ac10b-01cc-4372-a567-0e02b2c3d479
+          volumeMounts:
+            - name: media-volume
+              mountPath: /app/media
+
       containers:
         - name: streaming-service
           image: faridamousa/streaming-service
           ports:
-            - containerPort: 8083
+            - containerPort: 8080
           env:
+            - name: user-service
+              value: http://user-service:8080
             - name: SPRING_PROFILES_ACTIVE
               value: k8s
             - name: SPRING_DATA_MONGODB_URI
@@ -41,7 +59,10 @@ spec:
                 secretKeyRef:
                   name: rabbitmq-secret
                   key: RABBITMQ_DEFAULT_PASS
-            - name: SPRING_REDIS_HOST
-              value: redis_cache
-            - name: SPRING_REDIS_PORT
+            - name: SPRING_DATA_REDIS_HOST
+              value: redis
+            - name: SPRING_DATA_REDIS_PORT
               value: "6379"
+          volumeMounts:
+            - name: media-volume
+              mountPath: /app/media

@@ -35,11 +35,11 @@ spec:
                   name: user-postgres-secret
                   key: POSTGRES_PASSWORD
           volumeMounts:
-            - name: user_postgres-persistent-storage
+            - name: user-postgres-persistent-storage
               mountPath: /var/lib/postgresql/data
   volumeClaimTemplates:
     - metadata:
-        name: user_postgres-persistent-storage
+        name: user-postgres-persistent-storage
       spec:
         accessModes: [ "ReadWriteOnce" ]
         resources:

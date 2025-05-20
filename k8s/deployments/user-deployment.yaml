@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: user-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: user-service
@@ -16,12 +16,13 @@ spec:
         - name: user-service
           image: faridamousa/user-service:latest
           ports:
-            - containerPort: 8081
+            - containerPort: 8080
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: k8s
             - name: SPRING_DATASOURCE_URL
-              value: jdbc:postgresql://user-postgres-0.user-postgres:5432/customer_db
+              value:  jdbc:postgresql://user-postgres-0.user-postgres:5432/users
+
             - name: SPRING_DATASOURCE_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -46,7 +47,7 @@ spec:
                 secretKeyRef:
                   name: rabbitmq-secret
                   key: RABBITMQ_DEFAULT_PASS
-            - name: SPRING_REDIS_HOST
-              value: redis_cache
-            - name: SPRING_REDIS_PORT
+            - name: SPRING_DATA_REDIS_HOST
+              value: redis
+            - name: SPRING_DATA_REDIS_PORT
               value: "6379"

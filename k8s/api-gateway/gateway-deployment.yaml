@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: apigateway-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: apigateway-service
@@ -18,6 +18,9 @@ spec:
           ports:
             - containerPort: 8080
           env:
+#            - name: user-service
+#              value: http://user-service:8080
+
             - name: SPRING_PROFILES_ACTIVE
               value: k8s
             - name: SPRING_MAIN_WEB_APPLICATION_TYPE
@@ -30,14 +33,14 @@ spec:
               value: Path=/userapi/**
 
             - name: SPRING_CLOUD_GATEWAY_ROUTES_1_ID
-              value: music-service
+              value: music-service-songs
             - name: SPRING_CLOUD_GATEWAY_ROUTES_1_URI
               value: http://music-service:8080
             - name: SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0
               value: Path=/songs/**
 
             - name: SPRING_CLOUD_GATEWAY_ROUTES_2_ID
-              value: music-service
+              value: music-service-playlists
             - name: SPRING_CLOUD_GATEWAY_ROUTES_2_URI
               value: http://music-service:8080
             - name: SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0
@@ -48,11 +51,32 @@ spec:
             - name: SPRING_CLOUD_GATEWAY_ROUTES_3_URI
               value: http://socialmedia-service:8080
             - name: SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0
-              value: Path=/socialmedia/**
+              value: Path=/comments/**
 
             - name: SPRING_CLOUD_GATEWAY_ROUTES_4_ID
-              value: streaming-service
+              value: socialmedia-service
             - name: SPRING_CLOUD_GATEWAY_ROUTES_4_URI
-              value: http://streaming-service:8080
+              value: http://socialmedia-service:8080
             - name: SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0
+              value: Path=/feeds/**
+
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_5_ID
+              value: socialmedia-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_5_URI
+              value: http://socialmedia-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0
+              value: Path=/likes/**
+
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_6_ID
+              value: socialmedia-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_6_URI
+              value: http://socialmedia-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_6_PREDICATES_0
+              value: Path=/posts/**
+
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_7_ID
+              value: streaming-service
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_7_URI
+              value: http://streaming-service:8080
+            - name: SPRING_CLOUD_GATEWAY_ROUTES_7_PREDICATES_0
               value: Path=/streaming/**

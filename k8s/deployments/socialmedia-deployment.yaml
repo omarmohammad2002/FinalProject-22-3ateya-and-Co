@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: socialmedia-service
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: socialmedia-service
@@ -14,9 +14,9 @@ spec:
     spec:
       containers:
         - name: socialmedia-service
-          image: faridamousa/socialmedia-service
+          image: faridamousa/socialmedia-service:latest
           ports:
-            - containerPort: 8083
+            - containerPort: 8080
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: k8s
@@ -41,7 +41,7 @@ spec:
                 secretKeyRef:
                   name: rabbitmq-secret
                   key: RABBITMQ_DEFAULT_PASS
-            - name: SPRING_REDIS_HOST
-              value: redis_cache
-            - name: SPRING_REDIS_PORT
+            - name: SPRING_DATA_REDIS_HOST
+              value: redis
+            - name: SPRING_DATA_REDIS_PORT
               value: "6379"
