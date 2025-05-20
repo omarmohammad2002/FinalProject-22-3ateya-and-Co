@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: socialmedia-service
-          image: faridamousa/socialmedia-service:latest
+          image: omarmohammad2002/socialmedia-service:latest
           ports:
             - containerPort: 8080
           env:
